@@ -59,49 +59,54 @@ export class Scene {
 
 
   async loadScene(url) {
-
     const response = await fetch(url);
     const data = await response.json();
-
     const nodes = data.nodes || [];
 
     for (const obj of nodes) {
-
       const name = obj.name;
 
       // Charger uniquement si pas déjà chargé
+      if (!this.loadedModels) this.loadedModels = {};
       if (!this.loadedModels[name]) {
         this.loadedModels[name] = await loadGltf(name);
       }
 
-      // loadGltf retourne déjà un OBJET SCENE prêt à cloner
       const original = this.loadedModels[name];
       const instance = original.clone(true);
 
       // Position
       if (obj.position) {
-        instance.position.fromArray(
-          obj.position.split(',').map(Number)
-        );
+        instance.position.fromArray(obj.position.split(',').map(Number));
       }
 
       // Rotation (quaternion)
       if (obj.rotation) {
-        instance.quaternion.fromArray(
-          obj.rotation.split(',').map(Number)
-        );
+        instance.quaternion.fromArray(obj.rotation.split(',').map(Number));
       }
 
       // Scale
       if (obj.scale) {
-        instance.scale.fromArray(
-          obj.scale.split(',').map(Number)
-        );
+        instance.scale.fromArray(obj.scale.split(',').map(Number));
       }
 
+      instance.traverse(o => {
+        if (o.isMesh) {
+          o.userData = {
+            isSelectable: true,
+            object : instance,
+          };
+        }});
+/*
+      // --- Propriétés utilisateur pour la sélection ---
+      instance.userData.selectable = true;  // le mesh est sélectionnable
+      instance.userData.objectName = name;  // nom de l’objet original
+      instance.userData.nodeId = obj.id || name; // si le JSON contient un id sinon le nom
+*/
       this.scene.add(instance);
     }
   }
+
 
   addSkybox(filename) {
     const loader = new TextureLoader();
