@@ -2,7 +2,6 @@ import * as THREE from 'three/webgpu'
 import {Scene} from "./scene.js";
 import {Camera} from "./camera.js";
 import {OrbitControls} from "three/examples/jsm/Addons.js";
-import {GLTFLoader} from "three/addons/loaders/GLTFLoader.js";
 
 
 
@@ -12,6 +11,8 @@ export class Application {
         this.renderer = new THREE.WebGPURenderer({antialias: true})
         this.renderer.setSize(window.innerWidth, window.innerHeight)
         document.body.appendChild(this.renderer.domElement)
+
+        this.renderer.shadowMap.enabled = true
 
         this.scene = new Scene()
         //this.scene.addCube()
@@ -25,6 +26,10 @@ export class Application {
         this.initParams()
         this.scene.addGround(this.groundTexture[3], this.groundParams.repeats)
 
+
+
+
+
       /*
         const gtlfLoader = new GLTFLoader();
         gtlfLoader.load('/models/spaceship.glb', (gltf) => {
@@ -32,7 +37,7 @@ export class Application {
           obj.position.z = 20
           this.scene.add(obj)
         });
-*/
+    */
         this.renderer.setAnimationLoop(this.render.bind(this))
     }
 
