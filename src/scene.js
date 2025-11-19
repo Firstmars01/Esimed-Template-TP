@@ -45,16 +45,18 @@ export class Scene {
   }
 
   addGround(texture, repeats){
-    const geometry = new THREE.PlaneGeometry(2048, 2048)
+    const geometry = new THREE.PlaneGeometry(2048, 2048);
 
-    const material = createStandardMaterial(texture, repeats)
+    const material = createStandardMaterial(texture, repeats);
 
-    const ground = new THREE.Mesh(geometry, material)
-    ground.rotation.x = - Math.PI / 2
-    ground.position.y = 0
-    ground.receiveShadow = true
-    this.scene.add(ground)
+    this.ground = new THREE.Mesh(geometry, material); // <- stocker le sol
+    this.ground.rotation.x = - Math.PI / 2;
+    this.ground.position.y = 0;
+    this.ground.receiveShadow = true;
+
+    this.scene.add(this.ground);
   }
+
 
   async loadScene(url) {
 
@@ -109,6 +111,29 @@ export class Scene {
       this.scene.background = texture;
     });
   }
+
+  changeGround(textureName, repeats = 1) {
+    if (!this.ground) return;
+
+    const newMaterial = createStandardMaterial(textureName, repeats);
+    this.ground.material.dispose();  // libère l’ancien matériau
+    this.ground.material = newMaterial;
+  }
+
+  changeSun(params) {
+    if (!this.sun) return;
+
+    // Intensité
+    this.sun.intensity = params.intensity ?? this.sun.intensity;
+
+    // Position
+    if (params.x !== undefined) this.sun.position.x = params.x;
+    if (params.z !== undefined) this.sun.position.z = params.z;
+
+    this.sun.updateMatrixWorld();
+  }
+
+
 
 }
 

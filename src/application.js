@@ -25,15 +25,18 @@ export class Application {
 
         this.initParams()
         this.scene.addGround(this.groundTexture[3], this.groundParams.repeats)
-
         this.scene.addSkybox(this.skyboxFiles[0])
 
         this.ui = new UI();
-        this.ui.addSkyboxUI(this.skyboxFiles, this.skyboxParams,
-        this.scene.addSkybox.bind(this.scene));
 
+        this.ui.addSkyboxUI(this.skyboxFiles, this.skyboxParams, this.scene.addSkybox.bind(this.scene));
 
-      this.renderer.setAnimationLoop(this.render.bind(this))
+        this.ui.addGroundUI(this.groundTexture, this.groundParams, this.scene.changeGround.bind(this.scene));
+
+        this.sunParams = { intensity: 2, x: 3, z: 0 };
+        this.ui.addSunUI(this.sunParams, this.scene.changeSun.bind(this.scene));
+
+        this.renderer.setAnimationLoop(this.render.bind(this))
     }
 
     render() {
@@ -45,8 +48,7 @@ export class Application {
 
 
     initParams() {
-      this.groundTexture =
-        [
+      this.groundTexture = [
           'aerial_grass_rock',
           'brown_mud_leaves_01',
           'forest_floor',
