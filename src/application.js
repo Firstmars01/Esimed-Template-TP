@@ -42,7 +42,7 @@ export class Application {
     this.ui = new UI();
     this.ui.addSkyboxUI(this.skyboxFiles, this.skyboxParams, this.scene.addSkybox.bind(this.scene));
     this.ui.addGroundUI(this.groundTexture, this.groundParams, this.scene.changeGround.bind(this.scene));
-    this.sunParams = { intensity: 2, x: 3, z: 0 };
+    this.sunParams = { intensity: 2, x: 3, z: 0 , color: '#ffffff' };
     this.ui.addSunUI(this.sunParams, this.scene.changeSun.bind(this.scene));
     this.ui.addSelectionUI();
 

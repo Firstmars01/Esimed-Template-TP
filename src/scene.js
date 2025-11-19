@@ -128,8 +128,15 @@ export class Scene {
   changeSun(params) {
     if (!this.sun) return;
 
+    // Couleur
+    if (params.color !== undefined) {
+      this.sun.color.set(params.color);
+    }
+
     // Intensité
-    this.sun.intensity = params.intensity ?? this.sun.intensity;
+    if (params.intensity !== undefined) {
+      this.sun.intensity = params.intensity;
+    }
 
     // Position
     if (params.x !== undefined) this.sun.position.x = params.x;
@@ -137,6 +144,7 @@ export class Scene {
 
     this.sun.updateMatrixWorld();
   }
+
 
 
 
