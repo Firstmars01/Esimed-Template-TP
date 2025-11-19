@@ -2,7 +2,7 @@ import * as THREE from 'three/webgpu'
 import {Scene} from "./scene.js";
 import {Camera} from "./camera.js";
 import {OrbitControls} from "three/examples/jsm/Addons.js";
-
+import { UI } from './iu.js';
 
 
 export class Application {
@@ -28,7 +28,12 @@ export class Application {
 
         this.scene.addSkybox(this.skyboxFiles[0])
 
-        this.renderer.setAnimationLoop(this.render.bind(this))
+        this.ui = new UI();
+        this.ui.addSkyboxUI(this.skyboxFiles, this.skyboxParams,
+        this.scene.addSkybox.bind(this.scene));
+
+
+      this.renderer.setAnimationLoop(this.render.bind(this))
     }
 
     render() {

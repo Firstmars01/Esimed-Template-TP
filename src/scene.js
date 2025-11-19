@@ -108,8 +108,7 @@ export class Scene {
       this.scene.environment = texture;
       this.scene.background = texture;
     });
-
-
   }
+
 }
 

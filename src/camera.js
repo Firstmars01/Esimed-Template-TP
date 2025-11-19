@@ -9,7 +9,7 @@ export class Camera {
 
     }
 
-    defaultPosition(x = 3, y = 3, z = 3, target = new THREE.Vector3(0, 0, 0)) {
+    defaultPosition(x = 10, y = 10, z = 10, target = new THREE.Vector3(0, 0, 0)) {
       this.camera.position.set(x, y, z)
       this.camera.lookAt(target)
       this.camera.updateProjectionMatrix()
