@@ -44,6 +44,7 @@ export class Application {
     this.ui.addGroundUI(this.groundTexture, this.groundParams, this.scene.changeGround.bind(this.scene));
     this.sunParams = { intensity: 2, x: 3, z: 0 };
     this.ui.addSunUI(this.sunParams, this.scene.changeSun.bind(this.scene));
+    this.ui.addSelectionUI();
 
     // Boucle de rendu
     this.renderer.setAnimationLoop(this.render.bind(this));
@@ -85,7 +86,6 @@ export class Application {
     }
 
   onClick(event) {
-    // coordonnées normalisées par rapport au canvas
     const rect = this.renderer.domElement.getBoundingClientRect();
     this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
     this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
@@ -93,43 +93,63 @@ export class Application {
     this.raycaster.setFromCamera(this.mouse, this.camera);
 
     const intersects = this.raycaster.intersectObjects(this.scene.scene.children, true);
-    if (intersects.length === 0) return;
+    if (intersects.length === 0) {
+      // clic dans le vide → désélection
+      if (this.selectedMesh && this.selectedMeshMaterial) {
+        this.selectedMesh.material = this.selectedMeshMaterial;
+      }
+      this.selectedMesh = null;
+      this.selectedMeshMaterial = null;
+      this.selectedObject = null;
 
-    // privilégie un objet marqué selectable sinon fallback sur le premier intersecté
+      if (this.ui) this.ui.updateSelection(null);
+      return;
+    }
+
     const hit = intersects.find(i => i.object.userData && i.object.userData.selectable) || intersects[0];
     const mesh = hit.object;
 
-    // remonte pour trouver l'objet "top-level" (parent direct au-dessus des groupes) afin d'obtenir la référence logique
+    // remonter pour trouver le parent top-level
     let top = mesh;
     while (top.parent && top.parent !== this.scene.scene) {
       top = top.parent;
     }
-    const selectedObjectRef = (top.userData && top.userData.object) ? top.userData.object : top;
 
-    // restaurer l'ancien matériau si présent
     if (this.selectedMesh && this.selectedMeshMaterial) {
       this.selectedMesh.material = this.selectedMeshMaterial;
     }
 
-    // sauvegarde profonde du matériau courant (supporte tableau)
     const origMat = mesh.material;
     this.selectedMeshMaterial = Array.isArray(origMat)
       ? origMat.map(m => (m && m.clone ? m.clone() : m))
       : (origMat && origMat.clone ? origMat.clone() : origMat);
 
     this.selectedMesh = mesh;
-    this.selectedObject = selectedObjectRef;
+    this.selectedObject = top;
 
-    // appliquer un matériau de sélection compatible (tableau si nécessaire)
     if (Array.isArray(this.selectedMeshMaterial)) {
       mesh.material = this.selectedMeshMaterial.map(() => new THREE.MeshBasicMaterial({ color: 0xff0000 }));
     } else {
-      mesh.material = new THREE.MeshBasicMaterial({ color: 0xff000f0 });
+      mesh.material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
     }
 
     console.log('Objet sélectionné :', this.selectedObject);
+
+    // --- Mise à jour du panneau UI ---
+    if (this.ui) {
+      this.ui.updateSelection({
+        name: top.name || 'Inconnu',          // nom de l’objet
+        posX: top.position.x,
+        posY: top.position.y,
+        posZ: top.position.z,
+        rotX: top.rotation.x,
+        rotY: top.rotation.y,
+        rotZ: top.rotation.z,
+        scaleX: top.scale.x,
+        scaleY: top.scale.y,
+        scaleZ: top.scale.z
+      });
+    }
   }
-
-
 
 }
