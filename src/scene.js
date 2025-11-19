@@ -1,6 +1,7 @@
 import * as THREE from 'three/webgpu'
 import {createStandardMaterial} from "./tools.js";
 import { loadGltf } from './tools.js';
+import {TextureLoader} from "three/webgpu";
 
 export class Scene {
 
@@ -98,6 +99,17 @@ export class Scene {
 
       this.scene.add(instance);
     }
+  }
+
+  addSkybox(filename) {
+    const loader = new TextureLoader();
+    loader.load(`/skybox/${filename}.jpg`, (texture) => {
+      texture.mapping = THREE.EquirectangularReflectionMapping;
+      this.scene.environment = texture;
+      this.scene.background = texture;
+    });
+
+
   }
 }
 

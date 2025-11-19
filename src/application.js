@@ -26,18 +26,8 @@ export class Application {
         this.initParams()
         this.scene.addGround(this.groundTexture[3], this.groundParams.repeats)
 
+        this.scene.addSkybox(this.skyboxFiles[0])
 
-
-
-
-      /*
-        const gtlfLoader = new GLTFLoader();
-        gtlfLoader.load('/models/spaceship.glb', (gltf) => {
-          const obj = gltf.scene
-          obj.position.z = 20
-          this.scene.add(obj)
-        });
-    */
         this.renderer.setAnimationLoop(this.render.bind(this))
     }
 
@@ -64,7 +54,15 @@ export class Application {
         repeats: 500
       }
 
+      this.skyboxFiles = [
+        'DaySkyHDRI019A_2K-TONEMAPPED',
+        'DaySkyHDRI050A_2K-TONEMAPPED',
+        'NightSkyHDRI009_2K-TONEMAPPED'
+      ]
 
+      this.skyboxParams = {
+        texture: this.skyboxFiles[0]
+      }
 
     }
 
