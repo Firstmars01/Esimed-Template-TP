@@ -89,7 +89,7 @@ export class UI {
   /*** Contrôle clavier ***/
   addKeyboardControlOption(params) {
     const folder = this.gui.addFolder('Contrôle clavier');
-    folder.add(params, 'keyboardMoveEnabled').name('Déplacement clavier WASD');
+    folder.add(params, 'keyboardMoveEnabled').name('Déplacement clavier ZQSD');
   }
 
   /*** Ajouter objet depuis une liste ***/

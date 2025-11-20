@@ -128,7 +128,7 @@ export class Application {
       this.keysPressed[key] = true;
 
       if (key === 'delete') this.deleteSelectedObject();
-      if (key === 'q') this.moveSelectedObject = !this.moveSelectedObject;
+      if (key === 'a') this.moveSelectedObject = !this.moveSelectedObject;
       if (key === 'r' && this.selectedObject) {
         this.rotateSelectedObject = true;
         this.startYRotation = this.selectedObject.rotation.y;
@@ -155,17 +155,30 @@ export class Application {
     // Déplacement clavier
     if (this.keyboardMoveEnabled) {
       const dir = new THREE.Vector3();
-      if (this.keysPressed['w']) dir.z -= 1;
-      if (this.keysPressed['s']) dir.z += 1;
-      if (this.keysPressed['a']) dir.x -= 1;
-      if (this.keysPressed['d']) dir.x += 1;
+      const forward = new THREE.Vector3();
+      const right = new THREE.Vector3();
+
+      this.camera.getWorldDirection(forward);
+      forward.y = 0;
+      forward.normalize();
+
+      right.crossVectors(forward, this.camera.up).normalize();
+
+      if (this.keysPressed['z']) dir.add(forward);
+      if (this.keysPressed['s']) dir.sub(forward);
+      if (this.keysPressed['q']) dir.sub(right);
+      if (this.keysPressed['d']) dir.add(right);
       if (this.keysPressed[' ']) dir.y += 1;
       if (this.keysPressed['shift']) dir.y -= 1;
+
       if (dir.lengthSq() > 0) {
         dir.normalize().multiplyScalar(this.keyboardSpeed);
         this.camera.position.add(dir);
+        this.controls.target.add(dir); // <— mettre à jour le target
       }
     }
+
+
 
     this.renderer.render(this.scene.scene, this.camera);
   }
