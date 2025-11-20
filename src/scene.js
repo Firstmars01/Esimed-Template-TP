@@ -12,14 +12,6 @@ export class Scene {
     this.sunHelper = null;
   }
 
-  /*** Ajout d'objets de base ***/
-  addCube(size = 1, color = 0xff0000) {
-    const geometry = new THREE.BoxGeometry(size, size, size);
-    const material = new THREE.MeshPhongMaterial({ color, flatShading: true });
-    const cube = new THREE.Mesh(geometry, material);
-    this.scene.add(cube);
-  }
-
   /*** Lumières ***/
   addAmbientLight(intensity = 0.3, color = 0xffffff) {
     const ambient = new THREE.AmbientLight(color, intensity);
@@ -42,7 +34,7 @@ export class Scene {
     this.scene.add(this.sun);
 
     this.sunHelper = new THREE.DirectionalLightHelper(this.sun);
-    this.scene.add(this.sunHelper);
+    //this.scene.add(this.sunHelper);
 
     return this.sunHelper;
   }

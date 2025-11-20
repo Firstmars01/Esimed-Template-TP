@@ -21,6 +21,41 @@
       </div>
   </div>
 
+  <!-- Bouton Home -->
+  <button id="btnHome" class="homeButton hidden" title="Accueil">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="30" height="30" fill="white">
+          <path d="M12 3l9 8h-3v9h-4v-6h-4v6H6v-9H3l9-8z"/>
+      </svg>
+  </button>
+
+
+  <!-- Menu in-game, caché par défaut -->
+  <div id="inGameMenu" style="display:none;">
+      <button id="btnCommands">Commandes</button>
+      <button id="btnLoadMap">Changer de map</button>
+
+      <div id="commandsPanel" style="display:none;">
+          <h3>Commandes</h3>
+          <p>Z – Avancer</p>
+          <p>S – Reculer</p>
+          <p>Q – Gauche</p>
+          <p>D – Droite</p>
+          <p>Espace – Drift</p>
+      </div>
+
+      <div id="loadMapPanel" style="display:none;">
+          <h3>Maps</h3>
+          <button class="mapButton" data-map="/scenes/scene_1.json">Forêt</button>
+          <button class="mapButton" data-map="/scenes/desert.json">Désert</button>
+          <button class="mapButton" data-map="/scenes/city.json">Ville</button>
+          <!-- Bouton pour parcourir et charger un fichier JSON -->
+          <input type="file" id="fileMapInput" accept=".json" style="display:none;">
+          <button class="mapButton" id="btnBrowseMap">Charger depuis PC</button>
+
+      </div>
+
+  </div>
+
   <script type="module" src="/src/main.js"></script>
   </body>
 

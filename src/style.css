@@ -223,6 +223,114 @@ button:focus-visible {
     100% { transform: translate(-50%, -50%) rotate(360deg); }
 }
 
+/* ----- Menu in-game ----- */
+#inGameMenu {
+    display: none; /* caché par défaut */
+    position: fixed;
+    top: 20px; /* remonte le menu */
+    right: 20px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: rgba(20, 20, 20, 0.85);
+    padding: 12px;
+    border: 2px solid #ff0000;
+    border-radius: 10px;
+    backdrop-filter: blur(4px);
+}
+
+/* Boutons principaux du menu in-game */
+#inGameMenu > button {
+    background: linear-gradient(145deg, #660000, #990000);
+    border: 2px solid #ff0000;
+    padding: 10px 16px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.5);
+    transition: all 0.2s;
+}
+
+#inGameMenu > button:hover {
+    background: linear-gradient(145deg, #ff1a1a, #b30000);
+    box-shadow: 0 5px 15px rgba(255,0,0,0.6);
+}
+
+/* Panneaux (commandes et map) */
+#commandsPanel,
+#loadMapPanel {
+    display: none; /* caché par défaut */
+    margin-top: 6px; /* réduit l'espace au-dessus des panneaux */
+    background: rgba(34, 34, 34, 0.95);
+    color: white;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #ff0000;
+    font-size: 13px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+
+#commandsPanel h3,
+#loadMapPanel h3 {
+    margin-top: 0;
+    text-align: center;
+    color: #ff4d4d;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Boutons de map */
+.mapButton {
+    width: 100%;
+    padding: 8px;
+    margin-top: 6px;
+    background: linear-gradient(145deg, #1a1a1a, #333);
+    color: #ff0000;
+    border: 1px solid #ff0000;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    text-transform: uppercase;
+    transition: all 0.2s;
+}
+
+.mapButton:hover {
+    background: linear-gradient(145deg, #ff0000, #660000);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(255,0,0,0.5);
+}
+
+/* Bouton Home en haut à gauche */
+.homeButton {
+    position: fixed;
+    top: 10px;
+    left: 20px;
+    z-index: 2000;
+    padding: 8px;
+    background-color: #1a1a1a; /* Fond sombre pour contraste */
+    border: 2px solid red;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.homeButton:hover {
+    background-color: #333;
+    transform: scale(1.1);
+}
+
+/* Masqué par défaut */
+.hidden {
+    display: none !important;
+}
+
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
