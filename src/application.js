@@ -218,7 +218,8 @@ export class Application {
     const intersects = this.raycaster.intersectObjects(this.scene.scene.children, true);
     if (!intersects.length) return this.clearSelection();
 
-    const hit = intersects.find(i => i.object.userData?.selectable) || intersects[0];
+    const hit = intersects.find(i => i.object.userData?.isSelectable) || null;
+    if (!hit) return this.clearSelection(); // si rien de sélectionnable, clear
     const mesh = hit.object;
 
     let top = mesh;

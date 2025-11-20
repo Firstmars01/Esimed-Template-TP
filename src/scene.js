@@ -56,7 +56,7 @@ export class Scene {
     this.ground.rotation.x = -Math.PI / 2;
     this.ground.position.y = 0;
     this.ground.receiveShadow = true;
-
+    this.ground.userData.isSelectable = false;
     this.scene.add(this.ground);
   }
 
