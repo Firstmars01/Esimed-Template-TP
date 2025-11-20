@@ -3,49 +3,50 @@ import GUI from 'lil-gui';
 export class UI {
   constructor() {
     this.gui = new GUI();
+    this.selectionData = null;
+    this.selectionFolder = null;
   }
 
-  addFunction(callback) {
-    this.exportScene = () => {
-      const event = new CustomEvent('exportScene');
-      window.dispatchEvent(event);
-    };
-
+  /*** Fonctions globales (Export, Clear, Import) ***/
+  addFunction(importCallback) {
     const folder = this.gui.addFolder('Fonctions');
+
     folder.add(this, 'exportScene').name('Export scene to JSON');
-
-    this.clearScene = () => {
-      const event = new CustomEvent('clearScene');
-      window.dispatchEvent(event);
-    };
-
     folder.add(this, 'clearScene').name('Clear scene');
-
-
-    const obj = { importScene: callback };
-    folder.add(obj, 'importScene').name('Import Scene');
+    folder.add({ importScene: importCallback }, 'importScene').name('Import Scene');
   }
 
+  exportScene() {
+    window.dispatchEvent(new CustomEvent('exportScene'));
+  }
 
+  clearScene() {
+    window.dispatchEvent(new CustomEvent('clearScene'));
+  }
+
+  /*** Skybox ***/
   addSkyboxUI(files, params, onChange) {
     const folder = this.gui.addFolder('Skybox');
     folder.add(params, 'texture', files).onChange(onChange);
   }
 
+  /*** Ground ***/
   addGroundUI(textures, params, onChange) {
     const folder = this.gui.addFolder('Ground');
     folder.add(params, 'texture', textures).onChange(() => onChange(params.texture, params.repeats));
     folder.add(params, 'repeats', 1, 2000, 1).onChange(() => onChange(params.texture, params.repeats));
   }
 
+  /*** Sun ***/
   addSunUI(params, onChange) {
     const folder = this.gui.addFolder('Sun');
-    folder.addColor(params, 'color').onChange(() => onChange(params));  // <-- couleur
+    folder.addColor(params, 'color').onChange(() => onChange(params));
     folder.add(params, 'intensity', 0, 10).onChange(() => onChange(params));
     folder.add(params, 'x', -100, 100).onChange(() => onChange(params));
     folder.add(params, 'z', -100, 100).onChange(() => onChange(params));
   }
 
+  /*** Sélection d’objet ***/
   addSelectionUI() {
     this.selectionData = {
       name: '',
@@ -55,16 +56,15 @@ export class UI {
     };
 
     this.selectionFolder = this.gui.addFolder('Objet sélectionné');
-    this.selectionFolder.add(this.selectionData, 'name').listen();
-    this.selectionFolder.add(this.selectionData, 'posX').listen();
-    this.selectionFolder.add(this.selectionData, 'posY').listen();
-    this.selectionFolder.add(this.selectionData, 'posZ').listen();
-    this.selectionFolder.add(this.selectionData, 'rotX').listen();
-    this.selectionFolder.add(this.selectionData, 'rotY').listen();
-    this.selectionFolder.add(this.selectionData, 'rotZ').listen();
-    this.selectionFolder.add(this.selectionData, 'scaleX').listen();
-    this.selectionFolder.add(this.selectionData, 'scaleY').listen();
-    this.selectionFolder.add(this.selectionData, 'scaleZ').listen();
+
+    const fields = [
+      'name',
+      'posX', 'posY', 'posZ',
+      'rotX', 'rotY', 'rotZ',
+      'scaleX', 'scaleY', 'scaleZ'
+    ];
+
+    fields.forEach(field => this.selectionFolder.add(this.selectionData, field).listen());
 
     this.selectionFolder.hide(); // caché par défaut
   }
@@ -75,23 +75,20 @@ export class UI {
       return;
     }
 
-    this.selectionData.name = obj.name;
-    this.selectionData.posX = obj.posX;
-    this.selectionData.posY = obj.posY;
-    this.selectionData.posZ = obj.posZ;
-    this.selectionData.rotX = obj.rotX;
-    this.selectionData.rotY = obj.rotY;
-    this.selectionData.rotZ = obj.rotZ;
-    this.selectionData.scaleX = obj.scaleX;
-    this.selectionData.scaleY = obj.scaleY;
-    this.selectionData.scaleZ = obj.scaleZ;
+    // Mise à jour des valeurs
+    this.selectionData.name = obj.name || '';
+    ['pos', 'rot', 'scale'].forEach(prefix => {
+      ['X', 'Y', 'Z'].forEach(axis => {
+        this.selectionData[`${prefix}${axis}`] = obj[`${prefix}${axis}`] ?? 0;
+      });
+    });
 
     this.selectionFolder.show();
   }
 
+  /*** Contrôle clavier ***/
   addKeyboardControlOption(params) {
     const folder = this.gui.addFolder('Contrôle clavier');
-    folder.add(params, 'keyboardMoveEnabled').name('Activer WASD');
+    folder.add(params, 'keyboardMoveEnabled').name('Déplacement clavier WASD');
   }
-
 }
