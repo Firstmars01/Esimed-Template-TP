@@ -41,6 +41,28 @@ export const loadGltf = function (filename) {
     });
 }
 
+export const loadGltfCar = function (filename) {
+  return new Promise((resolve, reject) => {
+    gltfLoader.load(
+      `/models/car/${filename}.glb`,
+      (gltf) => {
+        const mesh = gltf.scene
+        mesh.name = filename
+        mesh.traverse(o => {
+          if (o.isMesh) {
+            o.castShadow = true;
+            o.receiveShadow = true;
+          }})
+        resolve(mesh)
+      },
+      undefined,
+      (error) => {
+        console.error(`Error loading ${filename}:`, error)
+        reject(error)
+      }
+    );
+  });
+}
 
 export const createStandardMaterial = function (texture, repeats) {
 

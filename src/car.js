@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import {loadGltf} from "./tools.js";
+import { loadGltfCar } from "./tools.js";
 
 export class Car {
   constructor() {
@@ -7,9 +7,8 @@ export class Car {
 
     // Physique
     this.speed = 0;
-    this.maxSpeed = 0.5;
-    this.acceleration = 0.01;
-
+    this.maxSpeed = 1.0;      // vitesse max
+    this.acceleration = 0.02; // accélération
     this.turnSpeed = 0.03;
 
     // Drift
@@ -17,26 +16,25 @@ export class Car {
     this.driftIntensity = 0;
     this.maxDrift = 0.6;
 
+    // Friction
     this.friction = 0.94;
     this.driftFriction = 0.985;
   }
 
-
   setModel(model) {
+    this.object.clear(); // Supprime les anciens modèles enfants
     this.object.add(model);
   }
 
   update(keys) {
-
-    /** Accélération */
+    // --- Accélération / frein ---
     if (keys["z"]) this.speed += this.acceleration;
     else if (keys["s"]) this.speed -= this.acceleration;
     else this.speed *= 0.96;
 
     this.speed = THREE.MathUtils.clamp(this.speed, -this.maxSpeed, this.maxSpeed);
 
-
-    /** Drift activé */
+    // --- Drift ---
     if (keys[" "]) {
       this.isDrifting = true;
       this.driftIntensity = THREE.MathUtils.lerp(this.driftIntensity, 1, 0.15);
@@ -45,49 +43,35 @@ export class Car {
       this.driftIntensity = THREE.MathUtils.lerp(this.driftIntensity, 0, 0.1);
     }
 
-
-    /** Rotation */
+    // --- Rotation ---
     if (Math.abs(this.speed) > 0.005) {
       const turnFactor = this.speed / this.maxSpeed;
-
       if (keys["q"]) this.object.rotation.y += this.turnSpeed * turnFactor;
       if (keys["d"]) this.object.rotation.y -= this.turnSpeed * turnFactor;
     }
 
-
-    /** Direction voiture */
+    // --- Mouvement ---
     const forward = new THREE.Vector3(0, 0, -1).applyEuler(this.object.rotation);
     const side = new THREE.Vector3(1, 0, 0).applyEuler(this.object.rotation);
 
+    let driftDir = 0;
+    if (keys["q"]) driftDir = +1;
+    if (keys["d"]) driftDir = -1;
 
-    /** ✔️ Correction DRIFT directionnel */
-    let driftDirection = 0;
-
-    if (keys["q"]) driftDirection = +1; // drift vers la gauche
-    if (keys["d"]) driftDirection = -1; // drift vers la droite (corrigé)
-
-    const driftVector = side
-      .clone()
-      .multiplyScalar(this.speed * this.driftIntensity * this.maxDrift * driftDirection);
-
-
-    /** Mouvement final */
-    const move = forward.multiplyScalar(this.speed).add(driftVector);
-
+    const driftVec = side.clone().multiplyScalar(this.speed * this.driftIntensity * this.maxDrift * driftDir);
+    const move = forward.multiplyScalar(this.speed).add(driftVec);
     this.object.position.add(move);
 
-
-    /** Friction */
-    if (this.isDrifting) this.speed *= this.driftFriction;
-    else this.speed *= this.friction;
+    // --- Friction ---
+    this.speed *= this.isDrifting ? this.driftFriction : this.friction;
   }
 
-  // Nouvelle méthode pour changer le modèle
+  // --- Charger un nouveau modèle ---
   async loadModel(modelName, scene) {
     if (!modelName || !scene) return;
 
     try {
-      // Supprimer et libérer l'ancien modèle enfant
+      // Supprimer et libérer l'ancien modèle
       this.object.children.forEach(child => {
         this.object.remove(child);
         child.traverse(c => {
@@ -107,16 +91,16 @@ export class Car {
       });
 
       // Charger le nouveau modèle
-      const newMesh = await loadGltf(modelName);
+      const newMesh = await loadGltfCar(modelName);
 
-      // Ajouter le nouveau modèle dans le group
+      // Ajouter le nouveau modèle
       this.setModel(newMesh);
 
-      // Position et rotation initiales
+      // Position initiale
       this.object.position.set(0, 0, 0);
       this.object.rotation.set(0, 0, 0);
 
-      // Ajouter à la scène si pas déjà présent
+      // Ajouter à la scène
       if (!scene.children.includes(this.object)) scene.add(this.object);
 
       console.log(`${modelName} chargé avec succès !`);
@@ -125,8 +109,4 @@ export class Car {
       alert(`Impossible de charger la voiture ${modelName}. Vérifie le fichier dans /models/`);
     }
   }
-
-
 }
-
-

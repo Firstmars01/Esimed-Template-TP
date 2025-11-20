@@ -14,7 +14,7 @@ export class Game {
 
     // Scene + camera
     this.scene = new Scene();
-    this.scene.loadScene('/scenes/scene_1.json');
+    this.scene.loadScene('/scenes/scene_1.json').then(r =>   {} );
     this.camera = new Camera().camera;
 
     // Orbit controls
@@ -25,7 +25,7 @@ export class Game {
     this.scene.addAmbientLight();
     this.scene.addDirectionalLight();
     this.scene.addGround('forrest_ground_01', 500);
-    this.scene.addSkybox('DaySkyHDRI019A_2K-TONEMAPPED');
+    this.scene.addSkybox('citrus_orchard_road_puresky');
 
     // Car
     this.car = new Car();
@@ -46,7 +46,7 @@ export class Game {
     const loader = new GLTFLoader();
 
     loader.load(
-      '/models/FastCar.glb',
+      '/models/car/Dodge Challenger.glb',
       (gltf) => {
         const carModel = gltf.scene;
         carModel.scale.set(1, 1, 1);
@@ -71,9 +71,10 @@ export class Game {
   updateCameraFollow() {
     const carPos = this.car.object.position;
 
-    const idealOffset = new THREE.Vector3(0, 3, 6)
+    const idealOffset = new THREE.Vector3(0, 5, 12)
       .applyEuler(this.car.object.rotation)
       .add(carPos);
+
 
     const idealLookAt = carPos.clone().add(new THREE.Vector3(0, 1.5, 0));
 
