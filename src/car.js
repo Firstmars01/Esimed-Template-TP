@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import {loadGltf} from "./tools.js";
 
 export class Car {
   constructor() {
@@ -19,6 +20,7 @@ export class Car {
     this.friction = 0.94;
     this.driftFriction = 0.985;
   }
+
 
   setModel(model) {
     this.object.add(model);
@@ -79,4 +81,52 @@ export class Car {
     if (this.isDrifting) this.speed *= this.driftFriction;
     else this.speed *= this.friction;
   }
+
+  // Nouvelle méthode pour changer le modèle
+  async loadModel(modelName, scene) {
+    if (!modelName || !scene) return;
+
+    try {
+      // Supprimer et libérer l'ancien modèle enfant
+      this.object.children.forEach(child => {
+        this.object.remove(child);
+        child.traverse(c => {
+          if (c.isMesh) {
+            c.geometry.dispose();
+            if (Array.isArray(c.material)) {
+              c.material.forEach(m => {
+                if (m.map) m.map.dispose();
+                m.dispose();
+              });
+            } else {
+              if (c.material.map) c.material.map.dispose();
+              c.material.dispose();
+            }
+          }
+        });
+      });
+
+      // Charger le nouveau modèle
+      const newMesh = await loadGltf(modelName);
+
+      // Ajouter le nouveau modèle dans le group
+      this.setModel(newMesh);
+
+      // Position et rotation initiales
+      this.object.position.set(0, 0, 0);
+      this.object.rotation.set(0, 0, 0);
+
+      // Ajouter à la scène si pas déjà présent
+      if (!scene.children.includes(this.object)) scene.add(this.object);
+
+      console.log(`${modelName} chargé avec succès !`);
+    } catch (err) {
+      console.error(`Erreur lors du chargement de la voiture ${modelName}:`, err);
+      alert(`Impossible de charger la voiture ${modelName}. Vérifie le fichier dans /models/`);
+    }
+  }
+
+
 }
+
+

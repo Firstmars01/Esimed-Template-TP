@@ -1,353 +1,141 @@
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+    font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
+    color-scheme: light dark;
+    color: rgba(255, 255, 255, 0.87);
+    background-color: #242424;
+    font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
 }
 
 body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+    margin: 0;
+    display: flex;
+    place-items: center;
+    min-width: 320px;
+    min-height: 100vh;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
-
-#app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
-}
-
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vanilla:hover {
-  filter: drop-shadow(0 0 2em #f7df1eaa);
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
-}
+h1 { font-size: 3.2em; line-height: 1.1; }
+#app { max-width: 1280px; margin: 0 auto; padding: 2rem; text-align: center; }
+.logo { height: 6em; padding: 1.5em; will-change: filter; transition: filter 0.3s; }
+.logo:hover { filter: drop-shadow(0 0 2em #646cffaa); }
+.logo.vanilla:hover { filter: drop-shadow(0 0 2em #f7df1eaa); }
+.card { padding: 2em; }
+.read-the-docs { color: #888; }
+a { font-weight: 500; color: #646cff; text-decoration: inherit; }
+a:hover { color: #535bf2; }
 
 button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    padding: 0.6em 1.2em;
+    font-size: 1em;
+    font-weight: 500;
+    font-family: inherit;
+    background-color: #1a1a1a;
+    cursor: pointer;
+    transition: border-color 0.25s;
 }
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
+button:hover { border-color: #646cff; }
+button:focus, button:focus-visible { outline: 4px auto -webkit-focus-ring-color; }
 
-/* Fond du menu avec image */
+/* --- Menu principal --- */
 .menu {
-    position: absolute;
-    top: 0; left: 0;
+    position: absolute; top: 0; left: 0;
     width: 100%; height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    background: url('/pictures/background.jpg') no-repeat center center;
-    background-size: cover;
-    color: white;
-    font-family: 'Arial Black', Arial, sans-serif;
-    z-index: 1000;
-    text-shadow: 2px 2px 5px rgba(0,0,0,0.7);
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    background: url('/pictures/background.jpg') center/cover no-repeat;
+    color: white; font-family: 'Arial Black', Arial, sans-serif;
+    z-index: 1000; text-shadow: 2px 2px 5px rgba(0,0,0,0.7);
 }
-
-/* Titre du menu */
 .menu h1 {
-    font-size: 4em;
-    color: red;
-    margin-bottom: 50px;
-    text-shadow: 3px 3px 8px black;
-    letter-spacing: 3px;
-    text-align: center;
+    font-size: 4em; color: red; margin-bottom: 50px;
+    text-shadow: 3px 3px 8px black; letter-spacing: 3px; text-align: center;
 }
-
-/* Boutons stylisés */
 .menu button {
-    margin: 15px;
-    padding: 20px 60px;
-    font-size: 1.5em;
-    font-weight: bold;
-    cursor: pointer;
-    border: 3px solid red;
-    border-radius: 15px;
-    background: linear-gradient(145deg, #1a1a1a, #333);
-    color: red;
-    transition: all 0.3s ease;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+    margin: 15px; padding: 20px 60px; font-size: 1.5em; font-weight: bold;
+    cursor: pointer; border: 3px solid red; border-radius: 15px;
+    background: linear-gradient(145deg, #1a1a1a, #333); color: red;
+    transition: all 0.3s ease; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
 }
-
-/* Hover effet */
 .menu button:hover {
-    background: linear-gradient(145deg, #ff0000, #660000);
-    color: #fff;
-    transform: scale(1.1);
-    box-shadow: 0 8px 25px rgba(255,0,0,0.6);
+    background: linear-gradient(145deg, #ff0000, #660000); color: #fff;
+    transform: scale(1.1); box-shadow: 0 8px 25px rgba(255,0,0,0.6);
 }
-
-/* Focus (accessibilité) */
-.menu button:focus {
-    outline: none;
-    box-shadow: 0 0 0 4px rgba(255,0,0,0.5);
-}
-
-/* Texte du bouton avec style gamer */
+.menu button:focus { outline: none; box-shadow: 0 0 0 4px rgba(255,0,0,0.5); }
 .menu button::after {
-    content: '';
-    display: block;
-    height: 3px;
-    width: 0;
-    background: red;
-    transition: width 0.3s;
-    margin-top: 5px;
+    content: ''; display: block; height: 3px; width: 0; background: red;
+    transition: width 0.3s; margin-top: 5px;
 }
-.menu button:hover::after {
-    width: 100%;
-}
+.menu button:hover::after { width: 100%; }
 
-/* Loader full screen */
+/* --- Loader --- */
 #loader {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(0,0,0,0.8);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
     z-index: 1000;
 }
-
-/* Spinner container */
-.spinner {
-    position: relative;
-    width: 80px;
-    height: 80px;
-}
-
-/* Cercles */
+.spinner { position: relative; width: 80px; height: 80px; }
 .circle {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    border-radius: 50%;
-    border-style: solid;
-    transform: translate(-50%, -50%);
+    position: absolute; top: 50%; left: 50%; border-radius: 50%;
+    border-style: solid; transform: translate(-50%, -50%);
 }
+.circle1 { width: 80px; height: 80px; border: 6px solid; border-color: red black black black; animation: spin1 1.5s linear infinite; }
+.circle2 { width: 60px; height: 60px; border: 4px solid; border-color: gray black black black; animation: spin2 1s linear infinite reverse; }
+.circle3 { width: 40px; height: 40px; border: 3px solid; border-color: black gray black gray; animation: spin3 0.8s linear infinite; }
 
-.circle1 {
-    width: 80px;
-    height: 80px;
-    border-width: 6px;
-    border-color: red black black black;
-    animation: spin1 1.5s linear infinite;
-}
+@keyframes spin1 { 0%{transform:translate(-50%,-50%) rotate(0deg);} 100%{transform:translate(-50%,-50%) rotate(360deg);} }
+@keyframes spin2 { 0%{transform:translate(-50%,-50%) rotate(0deg);} 100%{transform:translate(-50%,-50%) rotate(360deg);} }
+@keyframes spin3 { 0%{transform:translate(-50%,-50%) rotate(0deg);} 100%{transform:translate(-50%,-50%) rotate(360deg);} }
 
-.circle2 {
-    width: 60px;
-    height: 60px;
-    border-width: 4px;
-    border-color: gray black black black;
-    animation: spin2 1s linear infinite reverse;
-}
-
-.circle3 {
-    width: 40px;
-    height: 40px;
-    border-width: 3px;
-    border-color: black gray black gray;
-    animation: spin3 0.8s linear infinite;
-}
-
-/* Animations */
-@keyframes spin1 {
-    0% { transform: translate(-50%, -50%) rotate(0deg); }
-    100% { transform: translate(-50%, -50%) rotate(360deg); }
-}
-
-@keyframes spin2 {
-    0% { transform: translate(-50%, -50%) rotate(0deg); }
-    100% { transform: translate(-50%, -50%) rotate(360deg); }
-}
-
-@keyframes spin3 {
-    0% { transform: translate(-50%, -50%) rotate(0deg); }
-    100% { transform: translate(-50%, -50%) rotate(360deg); }
-}
-
-/* ----- Menu in-game ----- */
+/* --- Menu in-game --- */
 #inGameMenu {
-    display: none; /* caché par défaut */
-    position: fixed;
-    top: 20px; /* remonte le menu */
-    right: 20px;
-    z-index: 1000;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    background: rgba(20, 20, 20, 0.85);
-    padding: 12px;
-    border: 2px solid #ff0000;
-    border-radius: 10px;
-    backdrop-filter: blur(4px);
+    position: fixed; top: 20px; right: 20px;
+    flex-direction: column; gap: 10px; background: rgba(20,20,20,0.85);
+    padding: 12px; border: 2px solid #ff0000; border-radius: 10px; backdrop-filter: blur(4px);
+    z-index: 1000; display: flex;
 }
-
-/* Boutons principaux du menu in-game */
 #inGameMenu > button {
-    background: linear-gradient(145deg, #660000, #990000);
-    border: 2px solid #ff0000;
-    padding: 10px 16px;
-    color: #fff;
-    font-size: 14px;
-    font-weight: bold;
-    border-radius: 8px;
-    cursor: pointer;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.5);
-    transition: all 0.2s;
+    background: linear-gradient(145deg, #660000, #990000); border: 2px solid #ff0000;
+    padding: 10px 16px; color: #fff; font-size: 14px; font-weight: bold;
+    border-radius: 8px; cursor: pointer; text-transform: uppercase; letter-spacing: 1px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.5); transition: all 0.2s;
 }
+#inGameMenu > button:hover { background: linear-gradient(145deg, #ff1a1a, #b30000); box-shadow: 0 5px 15px rgba(255,0,0,0.6); }
 
-#inGameMenu > button:hover {
-    background: linear-gradient(145deg, #ff1a1a, #b30000);
-    box-shadow: 0 5px 15px rgba(255,0,0,0.6);
+/* --- Panels communs (commandes, maps, voitures) --- */
+#commandsPanel, #loadMapPanel, #carPanel {
+    display: none; margin-top: 6px; background: rgba(34,34,34,0.95);
+    color: white; padding: 12px; border-radius: 8px; border: 1px solid #ff0000;
+    font-size: 13px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);
 }
-
-/* Panneaux (commandes et map) */
-#commandsPanel,
-#loadMapPanel {
-    display: none; /* caché par défaut */
-    margin-top: 6px; /* réduit l'espace au-dessus des panneaux */
-    background: rgba(34, 34, 34, 0.95);
-    color: white;
-    padding: 12px;
-    border-radius: 8px;
-    border: 1px solid #ff0000;
-    font-size: 13px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+#commandsPanel h3, #loadMapPanel h3, #carPanel h3 {
+    margin-top:0; text-align:center; color:#ff4d4d; font-size:14px; text-transform:uppercase; letter-spacing:1px;
 }
-
-#commandsPanel h3,
-#loadMapPanel h3 {
-    margin-top: 0;
-    text-align: center;
-    color: #ff4d4d;
-    font-size: 14px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-/* Boutons de map */
 .mapButton {
-    width: 100%;
-    padding: 8px;
-    margin-top: 6px;
-    background: linear-gradient(145deg, #1a1a1a, #333);
-    color: #ff0000;
-    border: 1px solid #ff0000;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: bold;
-    text-transform: uppercase;
+    width: 100%; padding: 8px; margin-top:6px; background: linear-gradient(145deg,#1a1a1a,#333);
+    color:#ff0000; border:1px solid #ff0000; border-radius:6px; cursor:pointer; font-weight:bold; text-transform:uppercase;
     transition: all 0.2s;
 }
+.mapButton:hover { background: linear-gradient(145deg,#ff0000,#660000); color:#fff; box-shadow:0 4px 12px rgba(255,0,0,0.5); }
 
-.mapButton:hover {
-    background: linear-gradient(145deg, #ff0000, #660000);
-    color: #fff;
-    box-shadow: 0 4px 12px rgba(255,0,0,0.5);
-}
-
-/* Bouton Home en haut à gauche */
+/* --- Bouton Home --- */
 .homeButton {
-    position: fixed;
-    top: 10px;
-    left: 20px;
-    z-index: 2000;
-    padding: 8px;
-    background-color: #1a1a1a; /* Fond sombre pour contraste */
-    border: 2px solid red;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: 0.2s;
+    position: fixed; top: 10px; left: 20px; z-index: 2000; padding: 8px;
+    background-color:#1a1a1a; border:2px solid red; border-radius:6px; cursor:pointer; transition:0.2s;
 }
+.homeButton:hover { background-color:#333; transform:scale(1.1); }
+.hidden { display: none !important; }
 
-.homeButton:hover {
-    background-color: #333;
-    transform: scale(1.1);
-}
-
-/* Masqué par défaut */
-.hidden {
-    display: none !important;
-}
-
-
+/* --- Media query pour thème clair --- */
 @media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
-    .menu h1 {
-        font-size: 2.8em;
-        margin-bottom: 30px;
-    }
-    .menu button {
-        padding: 15px 40px;
-        font-size: 1.2em;
-    }
+    :root { color:#213547; background-color:#ffffff; }
+    a:hover { color:#747bff; }
+    button { background-color:#f9f9f9; }
+    .menu h1 { font-size:2.8em; margin-bottom:30px; }
+    .menu button { padding:15px 40px; font-size:1.2em; }
 }

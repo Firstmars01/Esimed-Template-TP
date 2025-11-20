@@ -33,6 +33,7 @@
   <div id="inGameMenu" style="display:none;">
       <button id="btnCommands">Commandes</button>
       <button id="btnLoadMap">Changer de map</button>
+      <button id="btnChangeCar">Changer de voiture</button>
 
       <div id="commandsPanel" style="display:none;">
           <h3>Commandes</h3>
@@ -51,8 +52,15 @@
           <!-- Bouton pour parcourir et charger un fichier JSON -->
           <input type="file" id="fileMapInput" accept=".json" style="display:none;">
           <button class="mapButton" id="btnBrowseMap">Charger depuis PC</button>
-
       </div>
+
+      <div id="carPanel" style="display:none;">
+          <h3>Voitures</h3>
+          <button class="mapButton carButton" data-model="FastCar">FastCar</button>
+          <button class="mapButton carButton" data-model="bush1">SportCar</button>
+          <button class="mapButton carButton" data-model="Truck">Truck</button>
+      </div>
+
 
   </div>
 
