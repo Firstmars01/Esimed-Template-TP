@@ -34,6 +34,20 @@ export class Application {
       }
     });
 
+    window.addEventListener('exportScene', () => {
+      if (this.scene && typeof this.scene.exportScene === 'function') {
+        this.scene.exportScene(this.groundParams, this.skyboxParams);
+      } else {
+        console.warn('exportScene non disponible sur la scène');
+      }
+    });
+
+    window.addEventListener('clearScene', () => {
+      if (this.scene && typeof this.scene.clearScene === 'function') {
+        this.scene.clearScene();
+      }
+    });
+
     // Pour le déplacement de l’objet
     this.dragYOffset = null;
     window.addEventListener('mousemove', (e) => this.onMouseMove(e));
@@ -58,6 +72,7 @@ export class Application {
     this.sunParams = { intensity: 2, x: 3, z: 0 , color: '#ffffff' };
     this.ui.addSunUI(this.sunParams, this.scene.changeSun.bind(this.scene));
     this.ui.addSelectionUI();
+    this.ui.addFunction();
 
     // Boucle de rendu
     this.renderer.setAnimationLoop(this.render.bind(this));

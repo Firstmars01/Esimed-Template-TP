@@ -93,7 +93,7 @@ export class Scene {
       instance.traverse(o => {
         if (o.isMesh) {
           o.userData = {
-            isSelectable: true,
+            selectable: true,
             object : instance,
           };
         }});
@@ -145,6 +145,75 @@ export class Scene {
     this.sun.updateMatrixWorld();
   }
 
+  exportScene(Ground, skybox) {
+    // ground et skybox placés en premier dans l'objet exporté
+    const sceneData = { ground: Ground || null, skybox: skybox || null, nodes: [] };
+    const exported = new Set();
+
+    this.scene.traverse((obj) => {
+      if (obj.userData && obj.userData.isSelectable) {
+        const root = obj.userData.object || obj;
+        if (!exported.has(root)) {
+          exported.add(root);
+
+          const node = {
+            name: root.name || 'Inconnu',
+            position: root.position ? root.position.toArray().join(',') : '0,0,0',
+            rotation: root.quaternion ? root.quaternion.toArray().join(',') : '0,0,0,1',
+            scale: root.scale ? root.scale.toArray().join(',') : '1,1,1'
+          };
+
+          sceneData.nodes.push(node);
+        }
+      }
+    });
+
+    const jsonStr = JSON.stringify(sceneData, null, 2);
+    const blob = new Blob([jsonStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'scene_export.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+// Ajoutez cette méthode dans la classe Scene (fichier `src/scene.js`)
+  clearScene() {
+    const toRemove = new Set();
+
+    // Trouver tous les parents top-level des meshes marqués selectable
+    this.scene.traverse((obj) => {
+      if (obj.isMesh && obj.userData && obj.userData.selectable) {
+        let top = obj;
+        while (top.parent && top.parent !== this.scene) {
+          top = top.parent;
+        }
+        toRemove.add(top);
+      }
+    });
+
+    // Pour chaque objet à supprimer, parcourir ses enfants pour disposer ressources puis retirer de la scène
+    toRemove.forEach((obj) => {
+      obj.traverse((child) => {
+        if (child.isMesh) {
+          if (child.geometry && typeof child.geometry.dispose === 'function') {
+            child.geometry.dispose();
+          }
+          if (child.material) {
+            if (Array.isArray(child.material)) {
+              child.material.forEach((m) => { if (m && typeof m.dispose === 'function') m.dispose(); });
+            } else if (typeof child.material.dispose === 'function') {
+              child.material.dispose();
+            }
+          }
+        }
+      });
+      this.scene.remove(obj);
+    });
+  }
 
 
 

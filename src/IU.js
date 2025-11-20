@@ -5,6 +5,25 @@ export class UI {
     this.gui = new GUI();
   }
 
+  addFunction() {
+    this.exportScene = () => {
+      const event = new CustomEvent('exportScene');
+      window.dispatchEvent(event);
+    };
+
+    const folder = this.gui.addFolder('Fonctions');
+    folder.add(this, 'exportScene').name('Export scene to JSON');
+
+    this.clearScene = () => {
+      const event = new CustomEvent('clearScene');
+      window.dispatchEvent(event);
+    };
+
+    folder.add(this, 'clearScene').name('Clear scene');
+
+  }
+
+
   addSkyboxUI(files, params, onChange) {
     const folder = this.gui.addFolder('Skybox');
     folder.add(params, 'texture', files).onChange(onChange);
