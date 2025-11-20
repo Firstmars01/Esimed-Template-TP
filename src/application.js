@@ -4,6 +4,7 @@ import {Camera} from "./camera.js";
 import {OrbitControls} from "three/examples/jsm/Addons.js";
 import { UI } from './iu.js';
 
+//a faire Déplacement d’objets
 
 export class Application {
 
@@ -11,6 +12,7 @@ export class Application {
     this.selectedObject = null;
     this.selectedMesh = null;
     this.selectedMeshMaterial = null;
+    this.moveSelectedObject = false;
 
     // Création du renderer UNE seule fois
     this.renderer = new THREE.WebGPURenderer({ antialias: true });
@@ -24,6 +26,17 @@ export class Application {
 
     // Event listener pour la sélection
     window.addEventListener('click', this.onClick.bind(this));
+
+    window.addEventListener('keydown', (event) => {
+      if (event.key && event.key.toLowerCase() === 'q') {
+        this.moveSelectedObject = !this.moveSelectedObject;
+        console.log(`Déplacement de l'objet ${this.moveSelectedObject ? 'activé' : 'désactivé'}`);
+      }
+    });
+
+    // Pour le déplacement de l’objet
+    this.dragYOffset = null;
+    window.addEventListener('mousemove', (e) => this.onMouseMove(e));
 
     // Scene et caméra
     this.scene = new Scene();
@@ -151,5 +164,58 @@ export class Application {
       });
     }
   }
+
+
+  onMouseMove(event) {
+    if (!this.selectedObject || !this.moveSelectedObject) {
+      this.dragYOffset = null;
+      return;
+    }
+
+    // Position normalisée de la souris
+    const rect = this.renderer.domElement.getBoundingClientRect();
+    this.mouse.set(
+      ((event.clientX - rect.left) / rect.width) * 2 - 1,
+      -((event.clientY - rect.top) / rect.height) * 2 + 1
+    );
+
+    // Raycaster → caméra
+    this.raycaster.setFromCamera(this.mouse, this.camera);
+
+    // Plan au sol (y = 0)
+    if (!this._groundPlane) {
+      this._groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+    }
+
+    const point = new THREE.Vector3();
+    if (!this.raycaster.ray.intersectPlane(this._groundPlane, point)) return;
+
+    // Calcul du décalage vertical lors du premier mouvement
+    if (this.dragYOffset === null) {
+      this.dragYOffset = this.selectedObject.position.y - point.y;
+    }
+
+    // Déplacement de l'objet sélectionné
+    this.selectedObject.position.set(
+      point.x,
+      point.y + this.dragYOffset,
+      point.z
+    );
+
+    // Mise à jour du panneau UI
+    this.ui?.updateSelection({
+      name: this.selectedObject.name || "Inconnu",
+      posX: this.selectedObject.position.x,
+      posY: this.selectedObject.position.y,
+      posZ: this.selectedObject.position.z,
+      rotX: this.selectedObject.rotation.x,
+      rotY: this.selectedObject.rotation.y,
+      rotZ: this.selectedObject.rotation.z,
+      scaleX: this.selectedObject.scale.x,
+      scaleY: this.selectedObject.scale.y,
+      scaleZ: this.selectedObject.scale.z,
+    });
+  }
+
 
 }
