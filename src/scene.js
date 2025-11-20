@@ -105,12 +105,14 @@ export class Scene {
       if (rotation) instance.quaternion.fromArray(rotation.split(',').map(Number));
       if (scale) instance.scale.fromArray(scale.split(',').map(Number));
 
+      instance.userData.isSelectable = true; // <-- IMPORTANT
       instance.traverse(o => {
         if (o.isMesh) {
           o.userData.isSelectable = true;
-          o.userData.object = instance;
+          o.userData.object = instance; // parent root
         }
       });
+
 
       this.scene.add(instance);
     }
@@ -122,19 +124,18 @@ export class Scene {
     const exported = new Set();
 
     this.scene.traverse(obj => {
-      if (obj.userData?.isSelectable) {
-        const root = obj.userData.object || obj;
-        if (!exported.has(root)) {
-          exported.add(root);
-          sceneData.nodes.push({
-            name: root.name || 'Inconnu',
-            position: root.position?.toArray().join(',') || '0,0,0',
-            rotation: root.quaternion?.toArray().join(',') || '0,0,0,1',
-            scale: root.scale?.toArray().join(',') || '1,1,1'
-          });
-        }
+      if (obj.userData?.isSelectable && (!obj.parent || obj.parent === this.scene)) {
+        // on n'exporte que les parents root
+        sceneData.nodes.push({
+          name: obj.name || 'Inconnu',
+          position: obj.position.toArray().join(','),
+          rotation: obj.quaternion.toArray().join(','),
+          scale: obj.scale.toArray().join(',')
+        });
       }
     });
+
+
 
     const blob = new Blob([JSON.stringify(sceneData, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -204,7 +205,13 @@ export class Scene {
       if (rotation) instance.quaternion.fromArray(rotation.split(',').map(Number));
       if (scale) instance.scale.fromArray(scale.split(',').map(Number));
 
-      instance.traverse(o => { if (o.isMesh) o.userData.isSelectable = true; });
+      instance.userData.isSelectable = true;      // <- marque le root pour export
+      instance.traverse(o => {
+        if (o.isMesh) {
+          o.userData.isSelectable = true;
+          o.userData.object = instance;       // <- root parent pour export
+        }
+      });
       this.scene.add(instance);
     }
 

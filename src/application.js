@@ -104,8 +104,11 @@ export class Application {
     }
 
     const instance = this.scene.loadedModels[modelName].clone(true);
-    instance.position.set(0, 0, 0); // position initiale
-    instance.traverse(o => { if (o.isMesh) o.userData.isSelectable = true; });
+    instance.position.set(0, 0, 0);       // position initiale
+    instance.userData.isSelectable = true; // important pour l'export
+    instance.traverse(o => {
+      if (o.isMesh) o.userData.isSelectable = true;
+    });
 
     this.scene.scene.add(instance);
     console.log(`Objet ajouté : ${modelName}`);
