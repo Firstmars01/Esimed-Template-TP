@@ -48,6 +48,24 @@ export class Application {
       }
     });
 
+    const importInput = document.createElement('input');
+    importInput.type = 'file';
+    importInput.accept = '.json,application/json';
+    importInput.style.display = 'none';
+    document.body.appendChild(importInput);
+
+    importInput.addEventListener('change', async (event) => {
+      if (this.scene && typeof this.scene.importScene === 'function') {
+        await this.scene.importScene(event, {
+          skybox: this.skyboxParams,
+          ground: this.groundParams,
+        });
+      }
+      importInput.value = '';
+    });
+
+
+
     // Pour le déplacement de l’objet
     this.dragYOffset = null;
     window.addEventListener('mousemove', (e) => this.onMouseMove(e));
@@ -72,7 +90,7 @@ export class Application {
     this.sunParams = { intensity: 2, x: 3, z: 0 , color: '#ffffff' };
     this.ui.addSunUI(this.sunParams, this.scene.changeSun.bind(this.scene));
     this.ui.addSelectionUI();
-    this.ui.addFunction();
+    this.ui.addFunction(() => importInput.click());
 
     // Boucle de rendu
     this.renderer.setAnimationLoop(this.render.bind(this));

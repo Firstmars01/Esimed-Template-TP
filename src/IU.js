@@ -5,7 +5,7 @@ export class UI {
     this.gui = new GUI();
   }
 
-  addFunction() {
+  addFunction(callback) {
     this.exportScene = () => {
       const event = new CustomEvent('exportScene');
       window.dispatchEvent(event);
@@ -21,6 +21,9 @@ export class UI {
 
     folder.add(this, 'clearScene').name('Clear scene');
 
+
+    const obj = { importScene: callback };
+    folder.add(obj, 'importScene').name('Import Scene');
   }
 
 

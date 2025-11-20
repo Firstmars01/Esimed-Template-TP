@@ -216,6 +216,61 @@ export class Scene {
     });
   }
 
+  async importScene(event, params) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const text = await file.text();
+    const data = JSON.parse(text);
+
+    // Clear la scène avant d'importer
+    this.clearScene();
+
+    // Import du ground
+    if (data.ground) {
+      const g = data.ground;
+      this.changeGround(g.texture, g.repeats);
+      if (params.ground) {
+        params.ground.texture = g.texture;
+        params.ground.repeats = g.repeats;
+      }
+    }
+
+    // Import du skybox
+    if (data.skybox) {
+      const s = data.skybox;
+      this.addSkybox(s.texture);
+      if (params.skybox) params.skybox.texture = s.texture;
+    }
+
+    // Import des objets (nodes)
+    if (data.nodes && data.nodes.length > 0) {
+      for (const obj of data.nodes) {
+        const name = obj.name;
+        if (!this.loadedModels[name]) {
+          this.loadedModels[name] = await loadGltf(name);
+        }
+        const instance = this.loadedModels[name].clone(true);
+
+        // Position
+        if (obj.position) instance.position.fromArray(obj.position.split(',').map(Number));
+        // Rotation (quaternion)
+        if (obj.rotation) instance.quaternion.fromArray(obj.rotation.split(',').map(Number));
+        // Scale
+        if (obj.scale) instance.scale.fromArray(obj.scale.split(',').map(Number));
+
+        instance.traverse(o => {
+          if (o.isMesh) o.userData.isSelectable = true;
+        });
+
+        this.scene.add(instance);
+      }
+    }
+
+    // Restaurer le soleil si fourni
+    if (params.sun) this.changeSun(params.sun);
+  }
+
 
 
 }
