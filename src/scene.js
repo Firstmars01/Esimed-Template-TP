@@ -97,13 +97,6 @@ export class Scene {
         }
       });
 
-
-/*
-      // --- Propriétés utilisateur pour la sélection ---
-      instance.userData.selectable = true;  // le mesh est sélectionnable
-      instance.userData.objectName = name;  // nom de l’objet original
-      instance.userData.nodeId = obj.id || name; // si le JSON contient un id sinon le nom
-*/
       this.scene.add(instance);
     }
   }
