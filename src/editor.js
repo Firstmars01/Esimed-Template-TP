@@ -5,7 +5,7 @@ import { OrbitControls } from "three/examples/jsm/Addons.js";
 import { UI } from './iu.js';
 import {loadGltf} from "./tools.js";
 
-export class Application {
+export class Editor {
 
   constructor() {
     // Variables de sélection

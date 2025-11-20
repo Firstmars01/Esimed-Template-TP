@@ -4,10 +4,25 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>I like car</title>
+    <title>LRS</title>
   </head>
+
   <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.js"></script>
+  <div id="mainMenu" class="menu">
+      <h1>Low Rally Simulator</h1>
+      <button id="playBtn">Jouer</button>
+      <button id="editorBtn">Créer une map</button>
+  </div>
+  <div id="loader" style="display:none;">
+      <div class="spinner">
+          <div class="circle circle1"></div>
+          <div class="circle circle2"></div>
+          <div class="circle circle3"></div>
+      </div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
   </body>
+
+
 </html>
