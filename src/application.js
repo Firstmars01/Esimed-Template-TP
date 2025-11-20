@@ -28,6 +28,55 @@ export class Application {
     this.keysPressed = {};
     this.keyboardSpeed = 0.5;
 
+    this.rotateSelectedObject = false;  // pour activer la rotation
+    this.scaleSelectedObject = false;   // pour activer le scaling
+    this.startYRotation = 0;            // rotation initiale
+    this.startScale = null;             // échelle initiale
+
+    window.addEventListener('keydown', (event) => {
+      if (event.key.toLowerCase() === 'delete' && this.selectedObject) {
+        this.scene.remove(this.selectedObject); // supprime de la scène
+        this.selectedObject.traverse(child => {
+          if (child.isMesh) {
+            child.geometry.dispose();
+            if (Array.isArray(child.material)) {
+              child.material.forEach(m => m.dispose());
+            } else {
+              child.material.dispose();
+            }
+          }
+        });
+        this.selectedObject = null;
+        this.selectedMesh = null;
+        this.selectedMeshMaterial = null;
+
+        if (this.ui) this.ui.updateSelection(null);
+        console.log('Objet supprimé');
+      }
+    });
+
+
+
+    // Exemple : activer rotation/scaling avec touches R et E
+    window.addEventListener('keydown', (event) => {
+      if (!this.selectedObject) return;
+      const key = event.key.toLowerCase();
+      if (key === 'r') {
+        this.rotateSelectedObject = true;
+        this.startYRotation = this.selectedObject.rotation.y;
+      } else if (key === 'e') {
+        this.scaleSelectedObject = true;
+        this.startScale = this.selectedObject.scale.clone();
+      }
+    });
+
+    window.addEventListener('keyup', (event) => {
+      const key = event.key.toLowerCase();
+      if (key === 'r') this.rotateSelectedObject = false;
+      if (key === 'e') this.scaleSelectedObject = false;
+    });
+
+
     window.addEventListener('keydown', (e) => {
       this.keysPressed[e.key.toLowerCase()] = true;
     });
@@ -232,55 +281,64 @@ export class Application {
 
 
   onMouseMove(event) {
-    if (!this.selectedObject || !this.moveSelectedObject) {
-      this.dragYOffset = null;
-      return;
-    }
+    if (!this.selectedObject) return;
 
-    // Position normalisée de la souris
     const rect = this.renderer.domElement.getBoundingClientRect();
     this.mouse.set(
       ((event.clientX - rect.left) / rect.width) * 2 - 1,
       -((event.clientY - rect.top) / rect.height) * 2 + 1
     );
 
-    // Raycaster → caméra
     this.raycaster.setFromCamera(this.mouse, this.camera);
 
-    // Plan au sol (y = 0)
-    if (!this._groundPlane) {
-      this._groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
-    }
-
     const point = new THREE.Vector3();
+    if (!this._groundPlane) this._groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
     if (!this.raycaster.ray.intersectPlane(this._groundPlane, point)) return;
 
-    // Calcul du décalage vertical lors du premier mouvement
-    if (this.dragYOffset === null) {
-      this.dragYOffset = this.selectedObject.position.y - point.y;
+    // Déplacement
+    if (this.moveSelectedObject) {
+      if (this.dragYOffset === null) this.dragYOffset = this.selectedObject.position.y - point.y;
+      this.selectedObject.position.set(
+        point.x,
+        point.y + this.dragYOffset,
+        point.z
+      );
     }
 
-    // Déplacement de l'objet sélectionné
-    this.selectedObject.position.set(
-      point.x,
-      point.y + this.dragYOffset,
-      point.z
-    );
+    // Rotation autour de l'axe Y
+    if (this.rotateSelectedObject) {
+      const deltaX = event.movementX || 0; // variation horizontale
+      this.selectedObject.rotation.y = this.startYRotation + deltaX * 0.01; // ajuster sensibilité
+    }
 
-    // Mise à jour du panneau UI
-    this.ui?.updateSelection({
-      name: this.selectedObject.name || "Inconnu",
-      posX: this.selectedObject.position.x,
-      posY: this.selectedObject.position.y,
-      posZ: this.selectedObject.position.z,
-      rotX: this.selectedObject.rotation.x,
-      rotY: this.selectedObject.rotation.y,
-      rotZ: this.selectedObject.rotation.z,
-      scaleX: this.selectedObject.scale.x,
-      scaleY: this.selectedObject.scale.y,
-      scaleZ: this.selectedObject.scale.z,
-    });
+    // Changement d'échelle uniforme
+    if (this.scaleSelectedObject) {
+      const deltaY = event.movementY || 0; // variation verticale
+      const scaleFactor = 1 + deltaY * 0.01; // ajuster sensibilité
+      this.selectedObject.scale.set(
+        this.startScale.x * scaleFactor,
+        this.startScale.y * scaleFactor,
+        this.startScale.z * scaleFactor
+      );
+    }
+
+    // Mise à jour UI
+    if (this.ui) {
+      this.ui.updateSelection({
+        name: this.selectedObject.name || "Inconnu",
+        posX: this.selectedObject.position.x,
+        posY: this.selectedObject.position.y,
+        posZ: this.selectedObject.position.z,
+        rotX: this.selectedObject.rotation.x,
+        rotY: this.selectedObject.rotation.y,
+        rotZ: this.selectedObject.rotation.z,
+        scaleX: this.selectedObject.scale.x,
+        scaleY: this.selectedObject.scale.y,
+        scaleZ: this.selectedObject.scale.z,
+      });
+    }
   }
+
 
 
 }
