@@ -92,11 +92,12 @@ export class Scene {
 
       instance.traverse(o => {
         if (o.isMesh) {
-          o.userData = {
-            selectable: true,
-            object : instance,
-          };
-        }});
+          o.userData.isSelectable = true;   // <-- pour l'export
+          o.userData.object = instance;     // top-level parent
+        }
+      });
+
+
 /*
       // --- Propriétés utilisateur pour la sélection ---
       instance.userData.selectable = true;  // le mesh est sélectionnable
@@ -184,9 +185,8 @@ export class Scene {
   clearScene() {
     const toRemove = new Set();
 
-    // Trouver tous les parents top-level des meshes marqués selectable
     this.scene.traverse((obj) => {
-      if (obj.isMesh && obj.userData && obj.userData.selectable) {
+      if (obj.isMesh && obj.userData && obj.userData.isSelectable) {
         let top = obj;
         while (top.parent && top.parent !== this.scene) {
           top = top.parent;
@@ -194,6 +194,7 @@ export class Scene {
         toRemove.add(top);
       }
     });
+
 
     // Pour chaque objet à supprimer, parcourir ses enfants pour disposer ressources puis retirer de la scène
     toRemove.forEach((obj) => {
