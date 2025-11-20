@@ -89,5 +89,9 @@ export class UI {
     this.selectionFolder.show();
   }
 
+  addKeyboardControlOption(params) {
+    const folder = this.gui.addFolder('Contrôle clavier');
+    folder.add(params, 'keyboardMoveEnabled').name('Activer WASD');
+  }
 
 }

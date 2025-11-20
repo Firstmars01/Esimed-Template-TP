@@ -24,6 +24,19 @@ export class Application {
     this.raycaster = new THREE.Raycaster();
     this.mouse = new THREE.Vector2();
 
+    this.keyboardMoveEnabled = false;
+    this.keysPressed = {};
+    this.keyboardSpeed = 0.5;
+
+    window.addEventListener('keydown', (e) => {
+      this.keysPressed[e.key.toLowerCase()] = true;
+    });
+
+    window.addEventListener('keyup', (e) => {
+      this.keysPressed[e.key.toLowerCase()] = false;
+    });
+
+
     // Event listener pour la sélection
     window.addEventListener('click', this.onClick.bind(this));
 
@@ -91,6 +104,8 @@ export class Application {
     this.ui.addSunUI(this.sunParams, this.scene.changeSun.bind(this.scene));
     this.ui.addSelectionUI();
     this.ui.addFunction(() => importInput.click());
+    this.ui.addKeyboardControlOption(this);
+
 
     // Boucle de rendu
     this.renderer.setAnimationLoop(this.render.bind(this));
@@ -101,6 +116,23 @@ export class Application {
         // calculs application
         this.renderer.render(this.scene.scene, this.camera)
 
+      if (this.keyboardMoveEnabled) {
+        const dir = new THREE.Vector3();
+
+        if (this.keysPressed['w']) dir.z -= 1;
+        if (this.keysPressed['s']) dir.z += 1;
+        if (this.keysPressed['a']) dir.x -= 1;
+        if (this.keysPressed['d']) dir.x += 1;
+        if (this.keysPressed[' ']) dir.y += 1; // espace pour monter
+        if (this.keysPressed['shift']) dir.y -= 1; // shift pour descendre
+
+        if (dir.lengthSq() > 0) {
+          dir.normalize().multiplyScalar(this.keyboardSpeed);
+          this.camera.position.add(dir);
+        }
+      }
+
+      this.renderer.render(this.scene.scene, this.camera);
 
     }
 
