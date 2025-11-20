@@ -3,6 +3,7 @@ import { Scene } from "./scene.js";
 import { Camera } from "./camera.js";
 import { OrbitControls } from "three/examples/jsm/Addons.js";
 import { UI } from './iu.js';
+import {loadGltf} from "./tools.js";
 
 export class Application {
 
@@ -76,6 +77,12 @@ export class Application {
     // Event listeners
     this.initEventListeners();
 
+    // Exemple de liste de modèles
+    this.modelList = ['birch1','bush1','bush2','flowers1','grass1','log1','oak1','oak2','oak3','pine1','spruce1','stone1','stone2','stump1'];
+
+    // Après avoir initialisé UI
+    this.ui.addObjectFromListUI(this.modelList, this.addObject.bind(this));
+
     // Boucle de rendu
     this.renderer.setAnimationLoop(this.render.bind(this));
   }
@@ -86,6 +93,24 @@ export class Application {
     this.skyboxFiles = ['DaySkyHDRI019A_2K-TONEMAPPED','DaySkyHDRI050A_2K-TONEMAPPED','NightSkyHDRI009_2K-TONEMAPPED'];
     this.skyboxParams = { texture: this.skyboxFiles[0] };
   }
+
+  // Fonction pour ajouter le modèle
+  async addObject(modelName) {
+    if (!this.scene || !modelName) return;
+
+    // Charger le modèle si nécessaire
+    if (!this.scene.loadedModels[modelName]) {
+      this.scene.loadedModels[modelName] = await loadGltf(modelName);
+    }
+
+    const instance = this.scene.loadedModels[modelName].clone(true);
+    instance.position.set(0, 0, 0); // position initiale
+    instance.traverse(o => { if (o.isMesh) o.userData.isSelectable = true; });
+
+    this.scene.scene.add(instance);
+    console.log(`Objet ajouté : ${modelName}`);
+  }
+
 
   initEventListeners() {
     // Clic pour sélection

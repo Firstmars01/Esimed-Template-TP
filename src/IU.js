@@ -91,4 +91,13 @@ export class UI {
     const folder = this.gui.addFolder('Contrôle clavier');
     folder.add(params, 'keyboardMoveEnabled').name('Déplacement clavier WASD');
   }
+
+  /*** Ajouter objet depuis une liste ***/
+  addObjectFromListUI(models, addObjectCallback) {
+    const folder = this.gui.addFolder('Ajouter objet');
+    const params = { selectedModel: models[0] || '' };
+
+    folder.add(params, 'selectedModel', models).name('Modèle');
+    folder.add({ add: () => addObjectCallback(params.selectedModel) }, 'add').name('Ajouter');
+  }
 }
