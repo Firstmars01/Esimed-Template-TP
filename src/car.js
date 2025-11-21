@@ -18,7 +18,7 @@ export class Car {
     this.isDrifting = false;
     this.driftIntensity = 0;
     this.driftEase = 0.1;
-    this.maxDriftAngle = 1.2;
+    this.maxDriftAngle = 0.9;
 
     // Boost
     this.boostPower = 0.06;     // force du boost
@@ -72,8 +72,9 @@ export class Car {
       this.object.rotation.y = THREE.MathUtils.lerp(
         this.object.rotation.y,
         this.targetRotationY,
-        0.05 // plus petit = rotation plus lente, ajustable
+        0.03
       );
+
 
       // --- Inclinaison visuelle uniquement ---
       const maxTilt = 0.15; // angle max en radians
@@ -114,7 +115,7 @@ export class Car {
     if (keys["q"]) driftDir = 1;
     if (keys["d"]) driftDir = -1;
 
-    const driftVec = side.clone().multiplyScalar(this.speed * this.driftIntensity * driftDir * 0.5);
+    const driftVec = side.clone().multiplyScalar(this.speed * this.driftIntensity * driftDir * 0.15);
     const move = forward.clone().multiplyScalar(this.speed).add(driftVec);
     this.object.position.add(move);
 

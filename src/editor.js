@@ -85,7 +85,7 @@ export class Editor {
     this.initEventListeners();
 
     // Exemple de liste de modèles
-    this.modelList = ['Bush', 'Bush red', 'Forest', 'Log', 'Resource Gold', 'Tree', 'Twister Tree', 'Road'];
+    this.modelList = ['Start', 'Finish', 'Bush', 'Bush red', 'Forest', 'Log', 'Resource Gold', 'Tree', 'Twisted Tree'];
 
     // Après avoir initialisé UI
     this.ui.addObjectFromListUI(this.modelList, this.addObject.bind(this));
