@@ -1,9 +1,13 @@
+// javascript
 import * as THREE from 'three';
 import {loadGltfCar} from "./tools.js";
 
 export class Car {
   constructor() {
     this.object = new THREE.Group();
+    // Groupe séparé pour la partie visuelle (tilt uniquement visuel)
+    this.visual = new THREE.Group();
+    this.object.add(this.visual);
 
     // Physique
     this.speed = 0;
@@ -15,7 +19,7 @@ export class Car {
     this.isDrifting = false;
     this.driftIntensity = 0;
     this.driftEase = 0.1;
-    this.maxDriftAngle = 0.6; // plus d'angle quand drift
+    this.maxDriftAngle = 1.2; // plus d'angle quand drift
 
     // Friction
     this.friction = 0.95;
@@ -23,8 +27,9 @@ export class Car {
   }
 
   setModel(model) {
-    this.object.clear();
-    this.object.add(model);
+    // vider uniquement la partie visuelle
+    this.visual.clear();
+    this.visual.add(model);
   }
 
   update(keys) {
@@ -44,14 +49,23 @@ export class Car {
     );
 
     // --- Rotation avec drift (seulement si vitesse suffisante) ---
-    if (Math.abs(this.speed) > 0.01) { // ← vitesse minimale pour tourner
+    if (Math.abs(this.speed) > 0.01) {
       let turnDir = 0;
       if (keys["q"]) turnDir = 1;
       if (keys["d"]) turnDir = -1;
 
-      // Ajouter l’effet drift sur la rotation
       const driftTurn = turnDir * this.turnSpeed * (1 + this.driftIntensity * this.maxDriftAngle);
+      // appliquer le yaw sur l'objet principal (physique)
       this.object.rotation.y += driftTurn;
+
+      // --- Inclinaison visuelle uniquement (ne touche pas la physique/mouvement) ---
+      const maxTilt = 0.15; // angle max en radians
+      const targetTilt = -turnDir * this.driftIntensity * maxTilt;
+      this.visual.rotation.z = THREE.MathUtils.lerp(this.visual.rotation.z, targetTilt, 0.2);
+
+    } else {
+      // Revenir droit visuellement si pas de drift
+      this.visual.rotation.z = THREE.MathUtils.lerp(this.visual.rotation.z, 0, 0.2);
     }
 
     // --- Mouvement ---
@@ -75,9 +89,9 @@ export class Car {
     if (!modelName || !scene) return;
 
     try {
-      // Supprimer et libérer l'ancien modèle
-      this.object.children.forEach(child => {
-        this.object.remove(child);
+      // Supprimer et libérer l'ancien modèle uniquement dans la partie visuelle
+      this.visual.children.forEach(child => {
+        this.visual.remove(child);
         child.traverse(c => {
           if (c.isMesh) {
             c.geometry.dispose();
@@ -97,12 +111,13 @@ export class Car {
       // Charger le nouveau modèle
       const newMesh = await loadGltfCar(modelName);
 
-      // Ajouter le nouveau modèle
+      // Ajouter le nouveau modèle visuel
       this.setModel(newMesh);
 
       // Position initiale
       this.object.position.set(0, 0, 0);
       this.object.rotation.set(0, 0, 0);
+      this.visual.rotation.set(0, 0, 0);
 
       // Ajouter à la scène
       if (!scene.children.includes(this.object)) scene.add(this.object);
