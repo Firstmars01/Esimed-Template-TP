@@ -171,6 +171,9 @@ export class Scene {
       });
       this.scene.remove(obj);
     });
+
+    window.dispatchEvent(new CustomEvent('sceneChanged'));
+
   }
 
   async importScene(event, params) {
@@ -215,5 +218,10 @@ export class Scene {
     }
 
     if (params.sun) this.changeSun(params.sun);
+
+    window.dispatchEvent(new CustomEvent('sceneChanged'));
+
   }
+
+
 }

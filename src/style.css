@@ -131,6 +131,33 @@ button:focus, button:focus-visible { outline: 4px auto -webkit-focus-ring-color;
 .homeButton:hover { background-color:#333; transform:scale(1.1); }
 .hidden { display: none !important; }
 
+#game-finish-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.65);
+    z-index: 9999;
+    color: #fff;
+    font-family: Arial, sans-serif;
+}
+
+#game-finish-overlay div {
+    font-size: 40px;
+    margin-bottom: 20px;
+}
+
+#game-finish-overlay button {
+    padding: 10px 20px;
+    font-size: 18px;
+    cursor: pointer;
+    border-radius: 6px;
+    border: none;
+}
+
+
 /* --- Media query pour thème clair --- */
 @media (prefers-color-scheme: light) {
     :root { color:#213547; background-color:#ffffff; }
