@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { loadGltfCar } from "./tools.js";
+import {loadGltfCar} from "./tools.js";
 
 export class Car {
   constructor() {
@@ -7,47 +7,51 @@ export class Car {
 
     // Physique
     this.speed = 0;
-    this.maxSpeed = 1.0;      // vitesse max
-    this.acceleration = 0.02; // accélération
-    this.turnSpeed = 0.03;
+    this.maxSpeed = 1.2;
+    this.acceleration = 0.03;
+    this.turnSpeed = 0.04;
 
     // Drift
     this.isDrifting = false;
     this.driftIntensity = 0;
-    this.maxDrift = 0.6;
+    this.driftEase = 0.1;
+    this.maxDriftAngle = 0.6; // plus d'angle quand drift
 
     // Friction
-    this.friction = 0.94;
-    this.driftFriction = 0.985;
+    this.friction = 0.95;
+    this.driftFriction = 0.97;
   }
 
   setModel(model) {
-    this.object.clear(); // Supprime les anciens modèles enfants
+    this.object.clear();
     this.object.add(model);
   }
 
   update(keys) {
     // --- Accélération / frein ---
     if (keys["z"]) this.speed += this.acceleration;
-    else if (keys["s"]) this.speed -= this.acceleration;
-    else this.speed *= 0.96;
+    else if (keys["s"]) this.speed -= this.acceleration * 0.7;
+    else this.speed *= this.friction;
 
     this.speed = THREE.MathUtils.clamp(this.speed, -this.maxSpeed, this.maxSpeed);
 
     // --- Drift ---
-    if (keys[" "]) {
-      this.isDrifting = true;
-      this.driftIntensity = THREE.MathUtils.lerp(this.driftIntensity, 1, 0.15);
-    } else {
-      this.isDrifting = false;
-      this.driftIntensity = THREE.MathUtils.lerp(this.driftIntensity, 0, 0.1);
-    }
+    this.isDrifting = keys[" "];
+    this.driftIntensity = THREE.MathUtils.lerp(
+      this.driftIntensity,
+      this.isDrifting ? 1 : 0,
+      this.driftEase
+    );
 
-    // --- Rotation ---
-    if (Math.abs(this.speed) > 0.005) {
-      const turnFactor = this.speed / this.maxSpeed;
-      if (keys["q"]) this.object.rotation.y += this.turnSpeed * turnFactor;
-      if (keys["d"]) this.object.rotation.y -= this.turnSpeed * turnFactor;
+    // --- Rotation avec drift (seulement si vitesse suffisante) ---
+    if (Math.abs(this.speed) > 0.01) { // ← vitesse minimale pour tourner
+      let turnDir = 0;
+      if (keys["q"]) turnDir = 1;
+      if (keys["d"]) turnDir = -1;
+
+      // Ajouter l’effet drift sur la rotation
+      const driftTurn = turnDir * this.turnSpeed * (1 + this.driftIntensity * this.maxDriftAngle);
+      this.object.rotation.y += driftTurn;
     }
 
     // --- Mouvement ---
@@ -55,14 +59,14 @@ export class Car {
     const side = new THREE.Vector3(1, 0, 0).applyEuler(this.object.rotation);
 
     let driftDir = 0;
-    if (keys["q"]) driftDir = +1;
+    if (keys["q"]) driftDir = 1;
     if (keys["d"]) driftDir = -1;
 
-    const driftVec = side.clone().multiplyScalar(this.speed * this.driftIntensity * this.maxDrift * driftDir);
-    const move = forward.multiplyScalar(this.speed).add(driftVec);
+    const driftVec = side.clone().multiplyScalar(this.speed * this.driftIntensity * driftDir * 0.5);
+    const move = forward.clone().multiplyScalar(this.speed).add(driftVec);
     this.object.position.add(move);
 
-    // --- Friction ---
+    // --- Friction supplémentaire en drift ---
     this.speed *= this.isDrifting ? this.driftFriction : this.friction;
   }
 
@@ -109,4 +113,5 @@ export class Car {
       alert(`Impossible de charger la voiture ${modelName}. Vérifie le fichier dans /models/`);
     }
   }
+
 }

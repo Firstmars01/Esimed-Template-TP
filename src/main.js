@@ -131,8 +131,6 @@ async function loadCarButtons() {
 }
 
 
-
-
 // Charger dynamiquement les boutons des voitures
 loadCarButtons();
 
