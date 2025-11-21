@@ -136,7 +136,8 @@ export class Editor {
 
       if (key === 'delete') this.deleteSelectedObject();
       if (key === 'a') this.moveSelectedObject = !this.moveSelectedObject;
-      if (key === 'r' && this.selectedObject) {
+      // Empêcher la rotation si l'objet sélectionné a lockRotation
+      if (key === 'r' && this.selectedObject && !this.selectedObject.userData?.lockRotation) {
         this.rotateSelectedObject = true;
         this.startYRotation = this.selectedObject.rotation.y;
       }
@@ -251,12 +252,6 @@ export class Editor {
   onClick(event) {
     // Quand on sélectionne un nouvel objet → reset des modes actifs
     this.moveSelectedObject = false;
-    this.rotateSelectedObject = false;
-    this.scaleSelectedObject = false;
-    this.dragMode = false;
-    this.dragObject = null;
-    this.dragYOffset = null;
-
 
     if (!this.raycaster || !this.camera) return;
 
@@ -273,7 +268,14 @@ export class Editor {
     const mesh = hit.object;
 
     let top = mesh;
+    // remonter jusqu'au parent direct sous la scène
     while (top.parent && top.parent !== this.scene.scene) top = top.parent;
+
+    // Vérifier si l'objet (ou le mesh) est un start/finish et verrouiller la rotation sur l'objet racine (top)
+    const nameLower = (top.name || mesh.name || '').toLowerCase();
+    const isProtected = nameLower.includes('star') || nameLower.includes('finish');
+    top.userData = top.userData || {};
+    top.userData.lockRotation = isProtected; // verrouille la rotation pour start/finish
 
     // Restaurer ancien matériau
     if (this.selectedMesh && this.selectedMeshMaterial) this.selectedMesh.material = this.selectedMeshMaterial;
@@ -350,8 +352,11 @@ export class Editor {
 
     // Rotation
     if (this.rotateSelectedObject) {
-      const deltaX = event.movementX || 0;
-      this.selectedObject.rotation.y = this.startYRotation + deltaX * 0.01;
+      // Ne modifier la rotation QUE si l'objet n'est pas verrouillé
+      if (!this.selectedObject.userData?.lockRotation) {
+        const deltaX = event.movementX || 0;
+        this.selectedObject.rotation.y = this.startYRotation + deltaX * 0.01;
+      }
     }
 
     // Scale
