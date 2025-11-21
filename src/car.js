@@ -48,25 +48,38 @@ export class Car {
       this.driftEase
     );
 
-    // --- Rotation avec drift (seulement si vitesse suffisante) ---
+// --- Rotation avec drift (seulement si vitesse suffisante) ---
     if (Math.abs(this.speed) > 0.01) {
       let turnDir = 0;
       if (keys["q"]) turnDir = 1;
       if (keys["d"]) turnDir = -1;
 
+      // Calculer l'angle cible
       const driftTurn = turnDir * this.turnSpeed * (1 + this.driftIntensity * this.maxDriftAngle);
-      // appliquer le yaw sur l'objet principal (physique)
-      this.object.rotation.y += driftTurn;
 
-      // --- Inclinaison visuelle uniquement (ne touche pas la physique/mouvement) ---
+      if (!this.targetRotationY) this.targetRotationY = this.object.rotation.y;
+
+      // Mettre à jour la rotation cible
+      this.targetRotationY += driftTurn;
+
+      // Lisser la rotation réelle vers la cible
+      this.object.rotation.y = THREE.MathUtils.lerp(
+        this.object.rotation.y,
+        this.targetRotationY,
+        0.05 // plus petit = rotation plus lente, ajustable
+      );
+
+      // --- Inclinaison visuelle uniquement ---
       const maxTilt = 0.15; // angle max en radians
       const targetTilt = -turnDir * this.driftIntensity * maxTilt;
       this.visual.rotation.z = THREE.MathUtils.lerp(this.visual.rotation.z, targetTilt, 0.2);
 
     } else {
-      // Revenir droit visuellement si pas de drift
+      // Revenir droit visuellement
       this.visual.rotation.z = THREE.MathUtils.lerp(this.visual.rotation.z, 0, 0.2);
+      this.targetRotationY = this.object.rotation.y; // reset la rotation cible quand stop
     }
+
 
     // --- Mouvement ---
     const forward = new THREE.Vector3(0, 0, -1).applyEuler(this.object.rotation);
