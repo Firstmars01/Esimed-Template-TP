@@ -110,3 +110,36 @@ document.querySelectorAll('.carButton').forEach(btn => {
     await currentGame.car.loadModel(modelName, currentGame.scene.scene);
   });
 });
+
+async function loadCarButtons() {
+  const response = await fetch('/models/car/cars.json');
+  const cars = await response.json();
+
+  const container = document.getElementById('carPanel');
+  container.innerHTML = "";
+
+  cars.forEach(filename => {
+    const modelName = filename.replace(".glb", "");
+
+    const btn = document.createElement('button');
+    btn.className = "mapButton carButton";
+    btn.dataset.model = modelName;
+    btn.textContent = modelName;
+
+    container.appendChild(btn);
+  });
+}
+
+
+
+
+// Charger dynamiquement les boutons des voitures
+loadCarButtons();
+
+// Événements pour changer de voiture
+document.addEventListener("click", (e) => {
+  if (e.target.classList.contains("carButton")) {
+    const model = e.target.dataset.model;
+    currentGame.car.loadModel(model, currentGame.scene.scene);
+  }
+});
