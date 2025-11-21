@@ -18,7 +18,7 @@ export class Car {
     this.isDrifting = false;
     this.driftIntensity = 0;
     this.driftEase = 0.1;
-    this.maxDriftAngle = 0.9;
+    this.maxDriftAngle = 1.3;
 
     // Boost
     this.boostPower = 0.06;     // force du boost
