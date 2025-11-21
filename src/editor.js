@@ -8,6 +8,10 @@ import {loadGltf} from "./tools.js";
 export class Editor {
 
   constructor() {
+    this.dragMode = false;       // true si on veut déplacer l'objet avec la souris
+    this.dragYOffset = null;     // pour maintenir la hauteur relative
+
+
     // Variables de sélection
     this.selectedObject = null;
     this.selectedMesh = null;
@@ -78,7 +82,7 @@ export class Editor {
     this.initEventListeners();
 
     // Exemple de liste de modèles
-    this.modelList = ['birch1','bush1','bush2','flowers1','grass1','log1','oak1','oak2','oak3','pine1','spruce1','stone1','stone2','stump1'];
+    this.modelList = ['Bush', 'Bush red', 'Forest', 'Log', 'Resource Gold', 'Tree', 'Twister Tree', 'Road'];
 
     // Après avoir initialisé UI
     this.ui.addObjectFromListUI(this.modelList, this.addObject.bind(this));
@@ -137,6 +141,40 @@ export class Editor {
         this.scaleSelectedObject = true;
         this.startScale = this.selectedObject.scale.clone();
       }
+
+      //activer le mode drag sur touche M ---
+      if (key === 'm' && this.selectedObject) {
+        this.dragMode = !this.dragMode;
+        console.log(`Mode duplication ${this.dragMode ? 'activé' : 'désactivé'}`);
+
+        if (this.dragMode) {
+          // Cloner l'objet sélectionné
+          this.dragObject = this.selectedObject.clone(true);
+          this.dragObject.position.copy(this.selectedObject.position);
+          this.dragObject.rotation.copy(this.selectedObject.rotation);
+          this.dragObject.scale.copy(this.selectedObject.scale);
+
+          // Restaurer les matériaux d'origine du clone (pas rouge)
+          this.dragObject.traverse(o => {
+            if (o.isMesh) {
+              const origMat = this.selectedMeshMaterial;
+              o.material = Array.isArray(origMat)
+                ? origMat.map(m => (m.clone ? m.clone() : m))
+                : (origMat.clone ? origMat.clone() : origMat);
+            }
+          });
+
+          // Ajouter le clone à la scène
+          this.scene.scene.add(this.dragObject);
+
+          // Réinitialiser le Y offset
+          this.dragYOffset = null;
+        } else {
+          this.dragObject = null;
+        }
+      }
+
+
     });
 
     window.addEventListener('keyup', (e) => {
@@ -254,6 +292,31 @@ export class Editor {
 
   onMouseMove(event) {
     if (!this.selectedObject) return;
+
+    if (this.dragMode && this.dragObject) {
+      if (!this._groundPlane) this._groundPlane = new THREE.Plane(new THREE.Vector3(0,1,0), 0);
+      const point = new THREE.Vector3();
+      if (this.raycaster.ray.intersectPlane(this._groundPlane, point)) {
+        if (this.dragYOffset === null) this.dragYOffset = this.dragObject.position.y - point.y;
+        this.dragObject.position.set(point.x, point.y + this.dragYOffset, point.z);
+
+        // Mettre à jour l'UI si besoin
+        if (this.ui) {
+          this.ui.updateSelection({
+            name: this.dragObject.name || 'Inconnu',
+            posX: this.dragObject.position.x,
+            posY: this.dragObject.position.y,
+            posZ: this.dragObject.position.z,
+            rotX: this.dragObject.rotation.x,
+            rotY: this.dragObject.rotation.y,
+            rotZ: this.dragObject.rotation.z,
+            scaleX: this.dragObject.scale.x,
+            scaleY: this.dragObject.scale.y,
+            scaleZ: this.dragObject.scale.z
+          });
+        }
+      }
+    }
 
     const rect = this.renderer.domElement.getBoundingClientRect();
     this.mouse.set(
