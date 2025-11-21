@@ -5,7 +5,6 @@ import {loadGltfCar} from "./tools.js";
 export class Car {
   constructor() {
     this.object = new THREE.Group();
-    // Groupe séparé pour la partie visuelle (tilt uniquement visuel)
     this.visual = new THREE.Group();
     this.object.add(this.visual);
 
@@ -19,12 +18,19 @@ export class Car {
     this.isDrifting = false;
     this.driftIntensity = 0;
     this.driftEase = 0.1;
-    this.maxDriftAngle = 1.2; // plus d'angle quand drift
+    this.maxDriftAngle = 1.2;
+
+    // Boost
+    this.boostPower = 0.06;     // force du boost
+    this.boostMaxSpeed = 2.4;   // vitesse max sous boost
+    this.boostDecay = 0.96;     // perte progressive de boost
+    this.currentBoost = 0;      // boost actif (0 à power)
 
     // Friction
     this.friction = 0.95;
     this.driftFriction = 0.97;
   }
+
 
   setModel(model) {
     // vider uniquement la partie visuelle
@@ -80,6 +86,25 @@ export class Car {
       this.targetRotationY = this.object.rotation.y; // reset la rotation cible quand stop
     }
 
+    // BOOST - shift (maj)
+    if (keys["shift"]) {
+      this.currentBoost = this.boostPower;
+    }
+
+// Appliquer le boost
+    if (this.currentBoost > 0) {
+      this.speed += this.currentBoost;
+      this.currentBoost *= this.boostDecay; // le boost disparaît petit à petit
+    }
+
+// Limite de vitesse sous boost
+    this.speed = THREE.MathUtils.clamp(
+      this.speed,
+      -this.maxSpeed,
+      this.boostMaxSpeed
+    );
+
+
 
     // --- Mouvement ---
     const forward = new THREE.Vector3(0, 0, -1).applyEuler(this.object.rotation);
@@ -92,6 +117,8 @@ export class Car {
     const driftVec = side.clone().multiplyScalar(this.speed * this.driftIntensity * driftDir * 0.5);
     const move = forward.clone().multiplyScalar(this.speed).add(driftVec);
     this.object.position.add(move);
+
+
 
     // --- Friction supplémentaire en drift ---
     this.speed *= this.isDrifting ? this.driftFriction : this.friction;
