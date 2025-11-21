@@ -249,6 +249,15 @@ export class Editor {
   }
 
   onClick(event) {
+    // Quand on sélectionne un nouvel objet → reset des modes actifs
+    this.moveSelectedObject = false;
+    this.rotateSelectedObject = false;
+    this.scaleSelectedObject = false;
+    this.dragMode = false;
+    this.dragObject = null;
+    this.dragYOffset = null;
+
+
     if (!this.raycaster || !this.camera) return;
 
     const rect = this.renderer.domElement.getBoundingClientRect();
