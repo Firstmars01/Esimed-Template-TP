@@ -45,11 +45,14 @@ export class Editor {
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.scene.addAmbientLight();
     this.scene.addDirectionalLight();
+    this.scene.addDirectionalLightEditor();
+
 
     // Paramètres
     this.initParams();
     this.scene.addGround(this.groundTexture[3], this.groundParams.repeats);
     this.scene.addSkybox(this.skyboxFiles[0]);
+
 
     // UI
     this.ui = new UI();

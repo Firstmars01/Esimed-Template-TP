@@ -39,6 +39,13 @@ export class Scene {
     return this.sunHelper;
   }
 
+  addDirectionalLightEditor(intensity = 3.0, color = 0xffffff, position = [50, 100, 0]) {
+
+    this.scene.add(this.sunHelper);
+
+    return this.sunHelper;
+  }
+
   /*** Sol ***/
   addGround(texture, repeats = 1) {
     const geometry = new THREE.PlaneGeometry(2048, 2048);
