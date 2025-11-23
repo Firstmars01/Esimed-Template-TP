@@ -124,7 +124,6 @@ button:focus, button:focus-visible { outline: 4px auto -webkit-focus-ring-color;
     z-index: 2500; display: flex;
 }
 
-
 .mapButton {
     width: 100%; padding: 8px; margin-top:6px; background: linear-gradient(145deg,#1a1a1a,#333);
     color:#ff0000; border:1px solid #ff0000; border-radius:6px; cursor:pointer; font-weight:bold; text-transform:uppercase;
@@ -140,6 +139,41 @@ button:focus, button:focus-visible { outline: 4px auto -webkit-focus-ring-color;
 .homeButton:hover { background-color:#333; transform:scale(1.1); }
 .hidden { display: none !important; }
 
+/* --- CHRONOMÈTRE --- */
+#game-timer {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: linear-gradient(145deg, rgba(20, 20, 20, 0.95), rgba(34, 34, 34, 0.95));
+    color: #ff0000;
+    padding: 20px 30px;
+    border-radius: 12px;
+    font-family: 'Courier New', monospace;
+    font-size: 32px;
+    font-weight: bold;
+    z-index: 1000;
+    box-shadow:
+            0 8px 20px rgba(0, 0, 0, 0.6),
+            0 0 0 2px #ff0000,
+            inset 0 0 20px rgba(255, 0, 0, 0.1);
+    border: 3px solid #660000;
+    letter-spacing: 2px;
+    text-shadow:
+            0 0 10px rgba(255, 0, 0, 0.8),
+            0 0 20px rgba(255, 0, 0, 0.4);
+    backdrop-filter: blur(8px);
+    transition: all 0.3s ease;
+}
+
+#game-timer:hover {
+    transform: scale(1.05);
+    box-shadow:
+            0 10px 30px rgba(255, 0, 0, 0.4),
+            0 0 0 2px #ff0000,
+            inset 0 0 30px rgba(255, 0, 0, 0.2);
+}
+
+/* --- Overlay de fin de jeu --- */
 #game-finish-overlay {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
@@ -147,25 +181,78 @@ button:focus, button:focus-visible { outline: 4px auto -webkit-focus-ring-color;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: rgba(0, 0, 0, 0.65);
+    background: linear-gradient(145deg, rgba(0, 0, 0, 0.85), rgba(20, 20, 20, 0.90));
+    backdrop-filter: blur(10px);
     z-index: 9999;
     color: #fff;
-    font-family: Arial, sans-serif;
+    font-family: 'Arial Black', Arial, sans-serif;
+    animation: fadeIn 0.5s ease;
 }
 
-#game-finish-overlay div {
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+#game-finish-overlay > div:first-child {
+    font-size: 72px;
+    color: #ff0000;
+    margin-bottom: 30px;
+    text-shadow:
+            0 0 20px rgba(255, 0, 0, 0.8),
+            0 0 40px rgba(255, 0, 0, 0.5),
+            3px 3px 8px rgba(0, 0, 0, 0.9);
+    letter-spacing: 8px;
+    text-transform: uppercase;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+#game-finish-overlay > div:nth-child(2) {
     font-size: 40px;
-    margin-bottom: 20px;
+    color: #ffffff;
+    margin-bottom: 40px;
+    font-family: 'Courier New', monospace;
+    background: linear-gradient(145deg, rgba(20, 20, 20, 0.8), rgba(34, 34, 34, 0.8));
+    padding: 15px 30px;
+    border-radius: 10px;
+    border: 2px solid #ff0000;
+    box-shadow:
+            0 5px 20px rgba(0, 0, 0, 0.5),
+            inset 0 0 20px rgba(255, 0, 0, 0.1);
+    letter-spacing: 3px;
 }
 
 #game-finish-overlay button {
-    padding: 10px 20px;
-    font-size: 18px;
+    padding: 20px 60px;
+    font-size: 24px;
+    font-weight: bold;
     cursor: pointer;
-    border-radius: 6px;
-    border: none;
+    border-radius: 12px;
+    border: 3px solid #ff0000;
+    background: linear-gradient(145deg, #660000, #990000);
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+    transition: all 0.3s ease;
 }
 
+#game-finish-overlay button:hover {
+    background: linear-gradient(145deg, #ff0000, #cc0000);
+    transform: scale(1.1);
+    box-shadow:
+            0 10px 30px rgba(255, 0, 0, 0.6),
+            0 0 20px rgba(255, 0, 0, 0.4);
+}
+
+#game-finish-overlay button:active {
+    transform: scale(1.05);
+}
 
 /* --- Media query pour thème clair --- */
 @media (prefers-color-scheme: light) {
