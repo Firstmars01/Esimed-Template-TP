@@ -1,4 +1,3 @@
-// javascript
 import * as THREE from 'three';
 import {loadGltfCar} from "./tools.js";
 
@@ -8,9 +7,9 @@ export class Car {
     this.visual = new THREE.Group();
     this.object.add(this.visual);
 
-    // Physique
+    // Speed
     this.speed = 0;
-    this.maxSpeed = 1.2;
+    this.maxSpeed = 1.0;
     this.acceleration = 0.03;
     this.turnSpeed = 0.04;
 
