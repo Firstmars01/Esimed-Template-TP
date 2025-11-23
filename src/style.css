@@ -108,14 +108,23 @@ button:focus, button:focus-visible { outline: 4px auto -webkit-focus-ring-color;
 #inGameMenu > button:hover { background: linear-gradient(145deg, #ff1a1a, #b30000); box-shadow: 0 5px 15px rgba(255,0,0,0.6); }
 
 /* --- Panels communs (commandes, maps, voitures) --- */
-#commandsPanel, #loadMapPanel, #carPanel {
+#commandsPanel, #loadMapPanel, #carPanel, #EditorCommandsPanel {
     display: none; margin-top: 6px; background: rgba(34,34,34,0.95);
     color: white; padding: 12px; border-radius: 8px; border: 1px solid #ff0000;
     font-size: 13px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);
 }
-#commandsPanel h3, #loadMapPanel h3, #carPanel h3 {
+#commandsPanel h3, #loadMapPanel h3, #carPanel h3, #EditorCommandsPanel h3 {
     margin-top:0; text-align:center; color:#ff4d4d; font-size:14px; text-transform:uppercase; letter-spacing:1px;
 }
+
+#editorMenu {
+    position: fixed; top: 64px; left: 20px; /* place under Home button */
+    flex-direction: column; gap: 10px; background: rgba(20,20,20,0.95);
+    padding: 12px; border: 2px solid #ff0000; border-radius: 10px; backdrop-filter: blur(4px);
+    z-index: 2500; display: flex;
+}
+
+
 .mapButton {
     width: 100%; padding: 8px; margin-top:6px; background: linear-gradient(145deg,#1a1a1a,#333);
     color:#ff0000; border:1px solid #ff0000; border-radius:6px; cursor:pointer; font-weight:bold; text-transform:uppercase;

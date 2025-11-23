@@ -44,6 +44,11 @@ export async function disposeCurrent() {
         try { currentGame.renderer.domElement.remove(); } catch (e) {}
     }
 
+    // hide editor commands panel when disposing
+    try { document.getElementById('EditorCommandsPanel').style.display = 'none'; } catch (e) {}
+    // hide editor menu container
+    try { document.getElementById('editorMenu').style.display = 'none'; } catch (e) {}
+
     currentGame = null;
 }
 
@@ -67,6 +72,14 @@ export async function startApp(AppClass) {
         }
 
         currentGame = appInstance;
+
+        // show editor menu and commands if Editor
+        try {
+            const editorMenu = document.getElementById('editorMenu');
+            const editorPanel = document.getElementById('EditorCommandsPanel');
+            if (editorMenu) editorMenu.style.display = (currentGame instanceof Editor) ? 'flex' : 'none';
+            if (editorPanel) editorPanel.style.display = (currentGame instanceof Editor) ? 'block' : 'none';
+        } catch (e) {}
 
         inGameMenu.style.display = currentGame instanceof Game ? 'block' : 'none';
         btnHome.classList.remove('hidden');
