@@ -6,16 +6,16 @@ export const textureloader = new THREE.TextureLoader()
 const gltfLoader = new GLTFLoader()
 
 export class ColorGUIHelper {
-  constructor(object, prop) {
-    this.object = object
-    this.prop = prop
-  }
-  get value() {
-    return `#${this.object[this.prop].getHexString()}`
-  }
-  set value(hexString) {
-    this.object[this.prop].set(hexString)
-  }
+    constructor(object, prop) {
+        this.object = object
+        this.prop = prop
+    }
+    get value() {
+        return `#${this.object[this.prop].getHexString()}`
+    }
+    set value(hexString) {
+        this.object[this.prop].set(hexString)
+    }
 }
 
 export const loadGltf = function (filename) {
@@ -25,11 +25,11 @@ export const loadGltf = function (filename) {
             (gltf) => {
                 const mesh = gltf.scene
                 mesh.name = filename
-                mesh.traverse(o => { 
-                if (o.isMesh) { 
-                    o.castShadow = true; 
-                    o.receiveShadow = true; 
-                }})
+                mesh.traverse(o => {
+                    if (o.isMesh) {
+                        o.castShadow = true;
+                        o.receiveShadow = true;
+                    }})
                 resolve(mesh)
             },
             undefined,
@@ -42,31 +42,31 @@ export const loadGltf = function (filename) {
 }
 
 export const loadGltfCar = function (filename) {
-  return new Promise((resolve, reject) => {
-    gltfLoader.load(
-      `/models/car/${filename}.glb`,
-      (gltf) => {
-        const mesh = gltf.scene
-        mesh.name = filename
-        mesh.traverse(o => {
-          if (o.isMesh) {
-            o.castShadow = true;
-            o.receiveShadow = true;
-          }})
-        resolve(mesh)
-      },
-      undefined,
-      (error) => {
-        console.error(`Error loading ${filename}:`, error)
-        reject(error)
-      }
-    );
-  });
+    return new Promise((resolve, reject) => {
+        gltfLoader.load(
+            `/models/car/${filename}.glb`,
+            (gltf) => {
+                const mesh = gltf.scene
+                mesh.name = filename
+                mesh.traverse(o => {
+                    if (o.isMesh) {
+                        o.castShadow = true;
+                        o.receiveShadow = true;
+                    }})
+                resolve(mesh)
+            },
+            undefined,
+            (error) => {
+                console.error(`Error loading ${filename}:`, error)
+                reject(error)
+            }
+        );
+    });
 }
 
 export const createStandardMaterial = function (texture, repeats) {
 
-  const floorTexture = textureloader.load(`textures/${texture}_diff_1k.jpg`)
+    const floorTexture = textureloader.load(`textures/${texture}_diff_1k.jpg`)
     floorTexture.wrapS = THREE.RepeatWrapping
     floorTexture.wrapT = THREE.RepeatWrapping
     floorTexture.repeat.set(repeats, repeats)
@@ -93,8 +93,8 @@ export const createStandardMaterial = function (texture, repeats) {
         aoMap: floorTextureARM,          // R
         roughnessMap: floorTextureARM,   // G
         metalnessMap: floorTextureARM,   // B
-        roughness: 1.0,       
-        metalness: 1.0,      
+        roughness: 1.0,
+        metalness: 1.0,
     })
 
 }

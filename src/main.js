@@ -108,6 +108,8 @@ document.querySelectorAll('.carButton').forEach(btn => {
     if (!modelName || !currentGame?.car || !currentGame?.scene) return;
 
     await currentGame.car.loadModel(modelName, currentGame.scene.scene);
+    // After loading, update obstacles list for collision detection
+    if (currentGame && currentGame.car) currentGame.car.setObstacles(currentGame.buildObstacleList());
   });
 });
 
@@ -134,10 +136,13 @@ async function loadCarButtons() {
 // Charger dynamiquement les boutons des voitures
 loadCarButtons();
 
-// Événements pour changer de voiture
+// Événements pour changer de voiture (délégué)
 document.addEventListener("click", (e) => {
   if (e.target.classList.contains("carButton")) {
     const model = e.target.dataset.model;
-    currentGame.car.loadModel(model, currentGame.scene.scene);
+    if (!model || !currentGame?.car || !currentGame?.scene) return;
+    currentGame.car.loadModel(model, currentGame.scene.scene).then(() => {
+      if (currentGame && currentGame.car) currentGame.car.setObstacles(currentGame.buildObstacleList());
+    });
   }
 });

@@ -23,12 +23,26 @@ export class Game {
       this._sceneLoaded = true;
       this.finishObject = this.findFinishObject();
       this.moveCarToStartIfReady();
+
+      // Build obstacle list and provide to car if present
+      const obstacles = this.buildObstacleList();
+      if (this.car) {
+        this.car.setScene(this.scene.scene);
+        this.car.setObstacles(obstacles);
+      }
     });
 
     window.addEventListener('sceneChanged', () => {
       this._sceneLoaded = true;
       this.finishObject = this.findFinishObject();
       this.moveCarToStartIfReady();
+
+      // Rebuild obstacles when the scene changes
+      const obstacles = this.buildObstacleList();
+      if (this.car) {
+        this.car.setScene(this.scene.scene);
+        this.car.setObstacles(obstacles);
+      }
     });
 
     this.camera = new Camera().camera;
@@ -64,6 +78,11 @@ export class Game {
         this.car.setModel(carModel);
         this.car.object.position.set(0, 0, 0);
         this.scene.scene.add(this.car.object);
+
+        // Provide scene & obstacles to car for collision detection
+        this.car.setScene(this.scene.scene);
+        this.car.setObstacles(this.buildObstacleList());
+
         this.moveCarToStartIfReady();
         this.controls.enabled = false;
         this.camera.position.set(0, 3, 6);
@@ -71,6 +90,25 @@ export class Game {
       (progress) => console.log(`Chargement voiture : ${(progress.loaded / progress.total) * 100}%`),
       (error) => console.error('Erreur GLTF : ', error)
     );
+  }
+
+  // --- Build a filtered list of obstacle meshes from the scene ---
+  buildObstacleList() {
+    const obstacles = [];
+    if (!this.scene || !this.scene.scene) return obstacles;
+
+    this.scene.scene.traverse(o => {
+      if (!o.isMesh) return;
+
+      // Ignore self/markers/objects explicitly flagged
+      if (o.userData && o.userData.ignoreObstacle) return;
+      const name = (o.name || '').toLowerCase();
+      if (name.includes('finish') || name.includes('start') || name.includes('car')) return;
+
+      obstacles.push(o);
+    });
+
+    return obstacles;
   }
 
   updateCameraFollow() {
