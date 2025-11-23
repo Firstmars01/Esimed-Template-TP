@@ -1,6 +1,7 @@
 // filepath: c:\Users\cleme\WebstormProjects\Esimed-Template-TP\src\car.js
 import * as THREE from 'three';
 import {loadGltfCar} from "../managers/modelLoader.js";
+import {WheelManager} from "./WheelManager.js";
 
 export class Car {
     constructor() {
@@ -21,29 +22,42 @@ export class Car {
         this.maxDriftAngle = 1.3;
 
         // Boost
-        this.boostPower = 0.06;     // force du boost
-        this.boostMaxSpeed = 2.4;   // vitesse max sous boost
-        this.boostDecay = 0.96;     // perte progressive de boost
-        this.currentBoost = 0;      // boost actif (0 à power)
+        this.boostPower = 0.06;
+        this.boostMaxSpeed = 2.4;
+        this.boostDecay = 0.96;
+        this.currentBoost = 0;
 
         // Friction
         this.friction = 0.95;
         this.driftFriction = 0.97;
 
+        // --- Gestionnaire de roues ---
+        this.wheelManager = null;
+
         // --- Obstacle detection (Raycaster) ---
         this.raycaster = new THREE.Raycaster();
-        this.stopDistance = 1.5;   // distance d'arrêt immédiat
-        this.brakeDistance = 4.0;  // distance de freinage progressive
-        this.rayYOffset = 0.5;     // hauteur du raycast au-dessus de la position
-        this.scene = null;         // référence à la scène (à fournir via setScene)
-        this.obstacleList = null;  // optionnel : liste d'obstacles à tester (perf)
+        this.stopDistance = 1.5;
+        this.brakeDistance = 4.0;
+        this.rayYOffset = 0.5;
+        this.scene = null;
+        this.obstacleList = null;
     }
-
 
     setModel(model) {
         // vider uniquement la partie visuelle
         this.visual.clear();
         this.visual.add(model);
+
+        // Initialiser le gestionnaire de roues avec le nouveau modèle
+        this.wheelManager = new WheelManager(model, {
+            wheelRadius: 0.3,
+            rotationAxis: 'x',
+            maxSteeringAngle: Math.PI / 6,
+            steeringAxis: 'y'
+        });
+
+        // Debug: afficher les infos des roues
+        this.wheelManager.debugInfo();
     }
 
     update(keys) {
@@ -62,9 +76,9 @@ export class Car {
             this.driftEase
         );
 
-// --- Rotation avec drift (seulement si vitesse suffisante) ---
+        // --- Rotation avec drift (seulement si vitesse suffisante) ---
+        let turnDir = 0;
         if (Math.abs(this.speed) > 0.01) {
-            let turnDir = 0;
             if (keys["q"]) turnDir = 1;
             if (keys["d"]) turnDir = -1;
 
@@ -83,16 +97,26 @@ export class Car {
                 0.03
             );
 
-
             // --- Inclinaison visuelle uniquement ---
-            const maxTilt = 0.15; // angle max en radians
+            const maxTilt = 0.15;
             const targetTilt = -turnDir * this.driftIntensity * maxTilt;
             this.visual.rotation.z = THREE.MathUtils.lerp(this.visual.rotation.z, targetTilt, 0.2);
 
         } else {
             // Revenir droit visuellement
             this.visual.rotation.z = THREE.MathUtils.lerp(this.visual.rotation.z, 0, 0.2);
-            this.targetRotationY = this.object.rotation.y; // reset la rotation cible quand stop
+            this.targetRotationY = this.object.rotation.y;
+        }
+
+        // --- Mise à jour de la direction des roues ---
+        if (this.wheelManager) {
+            if (turnDir !== 0 && Math.abs(this.speed) > 0.01) {
+                // Appliquer la direction avec intensité drift
+                this.wheelManager.updateSteering(turnDir, 1 + this.driftIntensity * 0.5);
+            } else {
+                // Revenir au centre
+                this.wheelManager.resetSteering();
+            }
         }
 
         // BOOST - shift (maj)
@@ -100,21 +124,18 @@ export class Car {
             this.currentBoost = this.boostPower;
         }
 
-// Appliquer le boost
+        // Appliquer le boost
         if (this.currentBoost > 0) {
             this.speed += this.currentBoost;
-            this.currentBoost *= this.boostDecay; // le boost disparaît petit à petit
+            this.currentBoost *= this.boostDecay;
         }
 
-// Limite de vitesse sous boost
+        // Limite de vitesse sous boost
         this.speed = THREE.MathUtils.clamp(
             this.speed,
             -this.maxSpeed,
             this.boostMaxSpeed
         );
-
-
-
 
         // --- Mouvement ---
         const forward = new THREE.Vector3(0, 0, -1).applyEuler(this.object.rotation);
@@ -142,12 +163,10 @@ export class Car {
             if (intersects.length > 0) {
                 const hit = intersects[0];
                 if (hit.distance <= this.stopDistance) {
-                    // arrêt immédiat
                     this.speed = 0;
                     this.currentBoost = 0;
                 } else if (hit.distance <= rayLen && hit.distance <= this.brakeDistance) {
-                    // freiner progressivement en fonction de la distance
-                    const t = hit.distance / this.brakeDistance; // 0..1
+                    const t = hit.distance / this.brakeDistance;
                     const brakeFactor = THREE.MathUtils.clamp(t, 0.1, 1);
                     this.speed *= brakeFactor;
                 }
@@ -156,7 +175,18 @@ export class Car {
 
         this.object.position.add(move);
 
+        // --- Mise à jour de la rotation des roues ---
+        if (this.wheelManager) {
+            this.wheelManager.updateRotation(this.speed);
 
+            // Optionnel: effet d'inclinaison lors du drift
+            if (this.isDrifting && Math.abs(driftDir) > 0) {
+                const side = driftDir > 0 ? 'left' : 'right';
+                this.wheelManager.applyTilt(0.05 * this.driftIntensity, side);
+            } else {
+                this.wheelManager.resetTilt();
+            }
+        }
 
         // --- Friction supplémentaire en drift ---
         this.speed *= this.isDrifting ? this.driftFriction : this.friction;
@@ -189,11 +219,10 @@ export class Car {
             // Charger le nouveau modèle
             const newMesh = await loadGltfCar(modelName);
 
-            // Recentrer le modèle visuellement (évite que le skin apparaisse décalé)
+            // Recentrer le modèle visuellement
             try {
                 const box = new THREE.Box3().setFromObject(newMesh);
                 if (!box.isEmpty()) {
-
                     const center = new THREE.Vector3();
                     box.getCenter(center);
 
@@ -206,17 +235,15 @@ export class Car {
                     // Aligne la base du mesh sur y = 0
                     newMesh.position.y -= min.y;
 
-                    // 👇 Correction universelle : remonter la voiture un peu
-                    // Ajuste 0.05 selon ta scène (0.05 = 5 cm environ)
+                    // Correction universelle : remonter la voiture un peu
                     newMesh.position.y += 0.05;
                 }
             }
-             catch (e) {
-                // si le calcul échoue, on ignore et on ajoute le modèle tel quel
+            catch (e) {
                 console.warn('Recentering model failed:', e);
             }
 
-            // Ajouter le nouveau modèle visuel
+            // Ajouter le nouveau modèle visuel (initialise aussi le WheelManager)
             this.setModel(newMesh);
 
             // Ajouter à la scène
@@ -252,5 +279,6 @@ export class Car {
         }
         return false;
     }
+
 
 }

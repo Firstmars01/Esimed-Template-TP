@@ -80,9 +80,7 @@ export class Game {
         const carModel = gltf.scene;
         carModel.scale.set(1, 1, 1);
         this.car.setModel(carModel);
-        // Ne pas réinitialiser la position/rotation ici : la position sera réglée
-        // par moveCarToStartIfReady() si nécessaire. Evite de forcer (0,0,0).
-        // this.car.object.position.set(0, 0, 0);
+
         this.scene.scene.add(this.car.object);
 
         // Provide scene & obstacles to car for collision detection
