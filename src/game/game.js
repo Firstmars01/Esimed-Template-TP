@@ -4,6 +4,7 @@ import { Camera } from '../core/camera.js';
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { Car } from './car.js';
+import { SceneManager } from '../managers/SceneManager.js';
 
 export class Game {
   constructor() {
@@ -14,6 +15,9 @@ export class Game {
 
     // Scene & Camera
     this.scene = new Scene();
+    // expose sceneManager for external APIs (menu.js expects app.sceneManager)
+    this.sceneManager = new SceneManager(this.scene);
+
     this._sceneLoaded = false;
     this._pendingMoveToStart = false;
     this._gameFinished = false;

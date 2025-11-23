@@ -34,7 +34,13 @@ export class EditorUI {
     document.body.appendChild(importInput);
 
     importInput.addEventListener('change', async (event) => {
-      if (this.editor.scene?.importScene) {
+      // Prefer sceneManager.importScene if available, else fallback to core scene.importScene
+      if (this.editor.sceneManager?.importScene) {
+        await this.editor.sceneManager.importScene(event, {
+          skybox: this.editor.skyboxParams,
+          ground: this.editor.groundParams,
+        });
+      } else if (this.editor.scene?.importScene) {
         await this.editor.scene.importScene(event, {
           skybox: this.editor.skyboxParams,
           ground: this.editor.groundParams,
@@ -57,4 +63,3 @@ export class EditorUI {
     this.ui.updateSelection(data);
   }
 }
-

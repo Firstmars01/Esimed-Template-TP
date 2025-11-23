@@ -5,6 +5,7 @@ import { OrbitControls } from "three/examples/jsm/Addons.js";
 import { EditorUI } from './editorUI.js';
 import {loadGltf} from "../managers/modelLoader.js";
 import { Selection } from './Selection.js';
+import { SceneManager } from '../managers/SceneManager.js';
 
 export class Editor {
 
@@ -41,6 +42,9 @@ export class Editor {
 
     // Initialisation de la scène et de la caméra
     this.scene = new Scene();
+    // create a SceneManager wrapper to handle import/export/clear
+    this.sceneManager = new SceneManager(this.scene);
+
     this.scene.loadScene('/scenes/scene_1.json');
     this.camera = new Camera().camera;
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
@@ -171,9 +175,9 @@ export class Editor {
       if (key === 'e') this.scaleSelectedObject = false;
     });
 
-    // Export / Clear
-    window.addEventListener('exportScene', () => this.scene?.exportScene(this.groundParams, this.skyboxParams));
-    window.addEventListener('clearScene', () => this.scene?.clearScene());
+    // Export / Clear (délégué vers SceneManager)
+    window.addEventListener('exportScene', () => this.sceneManager?.exportScene(this.groundParams, this.skyboxParams));
+    window.addEventListener('clearScene', () => this.sceneManager?.clearScene());
   }
 
   render() {
