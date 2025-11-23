@@ -1,6 +1,6 @@
 import * as THREE from 'three/webgpu';
-import { Scene } from './scene.js';
-import { Camera } from './camera.js';
+import { Scene } from '../core/scene.js';
+import { Camera } from '../core/camera.js';
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { Car } from './car.js';

@@ -1,5 +1,5 @@
 import * as THREE from 'three/webgpu';
-import { createStandardMaterial, loadGltf } from './tools.js';
+import { createStandardMaterial, loadGltf } from '../managers/modelLoader.js';
 import { TextureLoader } from 'three/webgpu';
 
 export class Scene {
@@ -40,8 +40,32 @@ export class Scene {
   }
 
   addDirectionalLightEditor(intensity = 3.0, color = 0xffffff, position = [50, 100, 0]) {
+    // Ensure a directional light exists and apply requested parameters
+    if (!this.sun) {
+      this.addDirectionalLight(intensity, color, position);
+    } else {
+      // update existing sun
+      if (color !== undefined) this.sun.color = new THREE.Color(color);
+      if (intensity !== undefined) this.sun.intensity = intensity;
+      if (position !== undefined && Array.isArray(position)) this.sun.position.set(...position);
+      this.sun.updateMatrixWorld();
+    }
 
-    this.scene.add(this.sunHelper);
+    // Ensure helper exists and is added to the scene
+    if (!this.sunHelper) {
+      this.sunHelper = new THREE.DirectionalLightHelper(this.sun);
+      this.scene.add(this.sunHelper);
+    } else {
+      // update helper to reflect any changes
+      try {
+        this.sunHelper.update();
+      } catch (e) {
+        // some three versions use different helper APIs; recreate if update fails
+        this.scene.remove(this.sunHelper);
+        this.sunHelper = new THREE.DirectionalLightHelper(this.sun);
+        this.scene.add(this.sunHelper);
+      }
+    }
 
     return this.sunHelper;
   }
@@ -120,7 +144,6 @@ export class Scene {
   /*** Export / Import ***/
   exportScene(Ground, skybox) {
     const sceneData = { ground: Ground || null, skybox: skybox || null, nodes: [] };
-    const exported = new Set();
 
     this.scene.traverse(obj => {
       if (obj.userData?.isSelectable && (!obj.parent || obj.parent === this.scene)) {

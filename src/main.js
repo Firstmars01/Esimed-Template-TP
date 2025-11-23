@@ -1,148 +1,85 @@
 import './style.css';
-import { Editor } from "./editor.js";
-import { Game } from "./game.js";
+import { Editor } from "./editor/editor.js";
+import { Game } from "./game/game.js";
 
-
-
-const mainMenu = document.getElementById('mainMenu');
-const playBtn = document.getElementById('playBtn');
-const editorBtn = document.getElementById('editorBtn');
-const loader = document.getElementById('loader');
-const inGameMenu = document.getElementById('inGameMenu');
-const btnHome = document.getElementById('btnHome');
-
+// --- Références globales ---
 let currentGame;
 
 // --- Loader ---
-function showLoader() {
-  loader.style.display = 'flex';
+const loader = document.getElementById('loader');
+function showLoader() { loader.style.display = 'flex'; }
+function hideLoader() { loader.style.display = 'none'; }
+
+// --- Helpers scène ---
+export function getSceneApi(app) {
+    if (!app) return null;
+    if (app.sceneManager) return app.sceneManager;
+    if (app.scene) return app.scene;
+    return null;
 }
-function hideLoader() {
-  loader.style.display = 'none';
+
+export function getThreeScene(app) {
+    const api = getSceneApi(app);
+    if (!api) return null;
+
+    if (typeof api.getScene === 'function') return api.getScene();
+    if (api.scene) return api.scene;
+
+    return null;
 }
 
-// --- Démarrage de l'application ---
-function startApp(AppClass) {
-  mainMenu.style.display = 'none';
-  showLoader();
+// --- Nettoyage application ---
+export async function disposeCurrent() {
+    if (!currentGame) return;
 
-  setTimeout(() => {
-    currentGame = new AppClass();
-
-    // Afficher le menu in-game uniquement si c’est le jeu
-    if (currentGame instanceof Game) {
-      inGameMenu.style.display = 'block';
-    } else {
-      inGameMenu.style.display = 'none';
+    if (typeof currentGame.dispose === 'function') {
+        await currentGame.dispose();
     }
 
-    // Afficher le bouton Home
-    btnHome.classList.remove('hidden');
+    if (currentGame.ui?.destroy) {
+        try { currentGame.ui.destroy(); } catch (e) {}
+    }
 
-    hideLoader();
-  }, 1500);
+    if (currentGame.renderer?.domElement) {
+        try { currentGame.renderer.domElement.remove(); } catch (e) {}
+    }
+
+    currentGame = null;
 }
 
-// --- Bouton Home ---
-btnHome.addEventListener('click', () => {
-  window.location.reload();
-});
+// --- Lancer une application ---
+export async function startApp(AppClass) {
+    const mainMenu = document.getElementById('mainMenu');
+    const inGameMenu = document.getElementById('inGameMenu');
+    const btnHome = document.getElementById('btnHome');
 
-// --- Boutons menu principal ---
-playBtn.addEventListener('click', () => startApp(Game));
-editorBtn.addEventListener('click', () => startApp(Editor));
+    mainMenu.style.display = 'none';
+    showLoader();
 
-// --- Panels in-game ---
-const panels = {
-  commands: document.getElementById('commandsPanel'),
-  maps: document.getElementById('loadMapPanel'),
-  cars: document.getElementById('carPanel')
+    try {
+        await new Promise(r => setTimeout(r, 800));
+
+        await disposeCurrent();
+        const appInstance = new AppClass();
+
+        if (typeof appInstance.init === 'function') {
+            await appInstance.init();
+        }
+
+        currentGame = appInstance;
+
+        inGameMenu.style.display = currentGame instanceof Game ? 'block' : 'none';
+        btnHome.classList.remove('hidden');
+
+    } catch (err) {
+        console.error('Erreur au lancement de l app :', err);
+        mainMenu.style.display = 'block';
+    } finally {
+        hideLoader();
+    }
+}
+
+// Helper debug
+window.__app = {
+    getCurrent: () => currentGame
 };
-
-function togglePanel(panelName) {
-  Object.keys(panels).forEach(name => {
-    if (name !== panelName) panels[name].style.display = 'none';
-  });
-  const panel = panels[panelName];
-  panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
-}
-
-// Event listeners pour toggle panels
-document.getElementById('btnCommands').addEventListener('click', () => togglePanel('commands'));
-document.getElementById('btnLoadMap').addEventListener('click', () => togglePanel('maps'));
-document.getElementById('btnChangeCar').addEventListener('click', () => togglePanel('cars'));
-
-// --- Charger une map ---
-document.querySelectorAll('.mapButton').forEach(btn => {
-  btn.addEventListener('click', async () => {
-    const mapUrl = btn.dataset.map;
-    if (!mapUrl || !currentGame?.scene) return;
-
-    // Supprimer les objets existants
-    currentGame.scene.clearScene();
-
-    // Charger la nouvelle map
-    await currentGame.scene.loadScene(mapUrl);
-  });
-});
-
-// Charger depuis PC
-document.getElementById('btnBrowseMap').addEventListener('click', () => {
-  document.getElementById('fileMapInput').click();
-});
-
-document.getElementById('fileMapInput').addEventListener('change', async (event) => {
-  if (!currentGame?.scene) return;
-
-  await currentGame.scene.importScene(event, {
-    sun: currentGame.scene.sun,
-    ground: currentGame.scene.ground,
-    skybox: currentGame.scene.skybox
-  });
-});
-
-// --- Changer de voiture ---
-document.querySelectorAll('.carButton').forEach(btn => {
-  btn.addEventListener('click', async () => {
-    const modelName = btn.dataset.model;
-    if (!modelName || !currentGame?.car || !currentGame?.scene) return;
-
-    await currentGame.car.loadModel(modelName, currentGame.scene.scene);
-    // After loading, update obstacles list for collision detection
-    if (currentGame && currentGame.car) currentGame.car.setObstacles(currentGame.buildObstacleList());
-  });
-});
-
-async function loadCarButtons() {
-  const response = await fetch('/models/car/cars.json');
-  const cars = await response.json();
-
-  const container = document.getElementById('carPanel');
-  container.innerHTML = "";
-
-  cars.forEach(filename => {
-    const modelName = filename.replace(".glb", "");
-
-    const btn = document.createElement('button');
-    btn.className = "mapButton carButton";
-    btn.dataset.model = modelName;
-    btn.textContent = modelName;
-
-    container.appendChild(btn);
-  });
-}
-
-
-// Charger dynamiquement les boutons des voitures
-loadCarButtons();
-
-// Événements pour changer de voiture (délégué)
-document.addEventListener("click", (e) => {
-  if (e.target.classList.contains("carButton")) {
-    const model = e.target.dataset.model;
-    if (!model || !currentGame?.car || !currentGame?.scene) return;
-    currentGame.car.loadModel(model, currentGame.scene.scene).then(() => {
-      if (currentGame && currentGame.car) currentGame.car.setObstacles(currentGame.buildObstacleList());
-    });
-  }
-});
