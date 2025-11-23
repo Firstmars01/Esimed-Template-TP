@@ -189,13 +189,35 @@ export class Car {
             // Charger le nouveau modèle
             const newMesh = await loadGltfCar(modelName);
 
+            // Recentrer le modèle visuellement (évite que le skin apparaisse décalé)
+            try {
+                const box = new THREE.Box3().setFromObject(newMesh);
+                if (!box.isEmpty()) {
+
+                    const center = new THREE.Vector3();
+                    box.getCenter(center);
+
+                    const min = box.min.clone();
+
+                    // Recentre X/Z
+                    newMesh.position.x -= center.x;
+                    newMesh.position.z -= center.z;
+
+                    // Aligne la base du mesh sur y = 0
+                    newMesh.position.y -= min.y;
+
+                    // 👇 Correction universelle : remonter la voiture un peu
+                    // Ajuste 0.05 selon ta scène (0.05 = 5 cm environ)
+                    newMesh.position.y += 0.05;
+                }
+            }
+             catch (e) {
+                // si le calcul échoue, on ignore et on ajoute le modèle tel quel
+                console.warn('Recentering model failed:', e);
+            }
+
             // Ajouter le nouveau modèle visuel
             this.setModel(newMesh);
-
-            // Position initiale
-            this.object.position.set(0, 0, 0);
-            this.object.rotation.set(0, 0, 0);
-            this.visual.rotation.set(0, 0, 0);
 
             // Ajouter à la scène
             if (!scene.children.includes(this.object)) scene.add(this.object);
