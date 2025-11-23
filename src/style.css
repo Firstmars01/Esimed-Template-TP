@@ -254,6 +254,229 @@ button:focus, button:focus-visible { outline: 4px auto -webkit-focus-ring-color;
     transform: scale(1.05);
 }
 
+#game-finish-overlay button:nth-child(2) {
+    background: linear-gradient(145deg, #cc6600, #ff8800);
+    border-color: #ffaa00;
+}
+
+#game-finish-overlay button:nth-child(2):hover {
+    background: linear-gradient(145deg, #ff8800, #ffaa00);
+    box-shadow:
+            0 10px 30px rgba(255, 136, 0, 0.6),
+            0 0 20px rgba(255, 170, 0, 0.4);
+}
+
+/* --- SCOREBOARD --- */
+#scoreboard-panel {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(145deg, rgba(0, 0, 0, 0.95), rgba(20, 20, 20, 0.95));
+    backdrop-filter: blur(10px);
+    z-index: 10000;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease;
+}
+
+.scoreboard-header {
+    position: relative;
+    width: 90%;
+    max-width: 800px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.scoreboard-header h2 {
+    font-size: 48px;
+    color: #ff0000;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    margin: 0;
+    text-shadow:
+            0 0 20px rgba(255, 0, 0, 0.8),
+            0 0 40px rgba(255, 0, 0, 0.4),
+            3px 3px 8px rgba(0, 0, 0, 0.9);
+}
+
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 12px 25px;
+    background: linear-gradient(145deg, #660000, #990000);
+    border: 2px solid #ff0000;
+    border-radius: 8px;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.close-btn::before {
+    font-size: 20px;
+    transition: transform 0.3s ease;
+}
+
+.close-btn:hover {
+    background: linear-gradient(145deg, #ff0000, #cc0000);
+    transform: translateX(5px);
+    box-shadow: 0 6px 25px rgba(255, 0, 0, 0.6);
+}
+
+.close-btn:hover::before {
+    transform: translateX(-3px);
+}
+
+.scoreboard-content {
+    width: 90%;
+    max-width: 800px;
+    max-height: 60vh;
+    overflow-y: auto;
+    background: linear-gradient(145deg, rgba(20, 20, 20, 0.9), rgba(34, 34, 34, 0.9));
+    border: 3px solid #ff0000;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow:
+            0 10px 40px rgba(0, 0, 0, 0.8),
+            inset 0 0 30px rgba(255, 0, 0, 0.1);
+}
+
+.scoreboard-content::-webkit-scrollbar {
+    width: 12px;
+}
+
+.scoreboard-content::-webkit-scrollbar-track {
+    background: rgba(20, 20, 20, 0.8);
+    border-radius: 10px;
+}
+
+.scoreboard-content::-webkit-scrollbar-thumb {
+    background: linear-gradient(145deg, #660000, #990000);
+    border-radius: 10px;
+    border: 2px solid #ff0000;
+}
+
+.scoreboard-content::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(145deg, #ff0000, #cc0000);
+}
+
+.no-scores {
+    text-align: center;
+    color: #999;
+    font-size: 20px;
+    padding: 40px;
+    font-style: italic;
+}
+
+.scores-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.score-item {
+    display: grid;
+    grid-template-columns: 60px 1fr 150px 100px;
+    gap: 15px;
+    align-items: center;
+    padding: 15px 20px;
+    background: linear-gradient(145deg, rgba(30, 30, 30, 0.8), rgba(40, 40, 40, 0.8));
+    border: 2px solid rgba(102, 0, 0, 0.5);
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.score-item:hover {
+    border-color: #ff0000;
+    background: linear-gradient(145deg, rgba(40, 40, 40, 0.9), rgba(50, 50, 50, 0.9));
+    transform: translateX(5px);
+    box-shadow: -5px 0 15px rgba(255, 0, 0, 0.3);
+}
+
+.score-item.top-three {
+    border-width: 3px;
+    border-color: #ff0000;
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.2);
+}
+
+.score-item .rank {
+    font-size: 24px;
+    font-weight: bold;
+    color: #ff0000;
+    text-align: center;
+}
+
+.score-item.top-three .rank {
+    font-size: 32px;
+    text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+}
+
+.score-item .player-name {
+    font-size: 18px;
+    color: white;
+    font-weight: bold;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.score-item .time {
+    font-size: 20px;
+    font-family: 'Courier New', monospace;
+    color: #ff0000;
+    font-weight: bold;
+    letter-spacing: 1px;
+    text-align: right;
+}
+
+.score-item.top-three .time {
+    font-size: 22px;
+    text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+}
+
+.score-item .date {
+    font-size: 14px;
+    color: #888;
+    text-align: right;
+}
+
+.scoreboard-actions {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.danger-btn {
+    padding: 12px 30px;
+    font-size: 16px;
+    font-weight: bold;
+    background: linear-gradient(145deg, #440000, #660000);
+    color: white;
+    border: 2px solid #880000;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.danger-btn:hover {
+    background: linear-gradient(145deg, #880000, #aa0000);
+    border-color: #ff0000;
+    box-shadow: 0 5px 20px rgba(255, 0, 0, 0.4);
+    transform: translateY(-2px);
+}
+
 /* --- Media query pour thème clair --- */
 @media (prefers-color-scheme: light) {
     :root { color:#213547; background-color:#ffffff; }
@@ -261,4 +484,25 @@ button:focus, button:focus-visible { outline: 4px auto -webkit-focus-ring-color;
     button { background-color:#f9f9f9; }
     .menu h1 { font-size:2.8em; margin-bottom:30px; }
     .menu button { padding:15px 40px; font-size:1.2em; }
+}
+
+/* Responsive Scoreboard */
+@media (max-width: 768px) {
+    .scoreboard-header h2 {
+        font-size: 32px;
+    }
+
+    .score-item {
+        grid-template-columns: 50px 1fr 120px;
+        gap: 10px;
+        padding: 12px 15px;
+    }
+
+    .score-item .date {
+        display: none;
+    }
+
+    .score-item .time {
+        font-size: 16px;
+    }
 }

@@ -6,6 +6,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { Car } from './car.js';
 import { SceneManager } from '../managers/SceneManager.js';
 import { Timer } from './Timer.js';
+import { Scoreboard } from './Scoreboard.js';
 
 export class Game {
     constructor() {
@@ -26,6 +27,10 @@ export class Game {
 
         // Timer
         this.timer = new Timer();
+
+        // Scoreboard
+        this.scoreboard = new Scoreboard(10);
+        this.scoreboard.setTrack('scene_1');
 
         this.scene.loadScene('/scenes/scene_1.json').then(() => {
             this._sceneLoaded = true;
@@ -78,6 +83,9 @@ export class Game {
         // Keyboard input
         window.addEventListener('keydown', e => this.keysPressed[e.key.toLowerCase()] = true);
         window.addEventListener('keyup', e => this.keysPressed[e.key.toLowerCase()] = false);
+
+        // Créer le bouton scoreboard
+        this.scoreboard.createScoreboardButton();
 
         // Render loop
         this.renderer.setAnimationLoop(this.render.bind(this));
@@ -222,36 +230,67 @@ export class Game {
         console.log('Game finished! Reached:', finish.name || 'finish');
         console.log('Final time:', this.timer.getFormattedTime());
 
+        // Vérifier si c'est un nouveau record ou un top score
+        const isRecord = this.scoreboard.isNewRecord(finalTime);
+        const isTopScore = this.scoreboard.isTopScore(finalTime);
+
+        // Si c'est un top score, demander le nom du joueur et l'ajouter
+        let position = null;
+        if (isTopScore) {
+            const playerName = this.scoreboard.promptPlayerName();
+            position = this.scoreboard.addScore(finalTime, playerName);
+        }
+
         window.dispatchEvent(new CustomEvent('gameFinished', {
             detail: {
                 finishName: finish.name || null,
                 time: finalTime,
-                formattedTime: this.timer.getFormattedTime()
+                formattedTime: this.timer.getFormattedTime(),
+                isRecord: isRecord,
+                isTopScore: isTopScore,
+                position: position
             }
         }));
 
-        this.createFinishOverlay();
+        this.createFinishOverlay(isRecord, position);
     }
 
-    createFinishOverlay() {
+    createFinishOverlay(isRecord = false, position = null) {
         if (document.getElementById('game-finish-overlay')) return;
 
         const overlay = document.createElement('div');
         overlay.id = 'game-finish-overlay';
 
         const msg = document.createElement('div');
-        msg.textContent = 'Finish!';
+        msg.textContent = isRecord ? '🏆 NEW RECORD!' : 'Finish!';
         overlay.appendChild(msg);
 
         const timeDisplay = document.createElement('div');
-        timeDisplay.textContent = `Time: ${this.timer.getFormattedTime()}`;
+        let timeText = `Time: ${this.timer.getFormattedTime()}`;
+        if (position) {
+            timeText += ` - Position: #${position}`;
+        }
+        timeDisplay.textContent = timeText;
         overlay.appendChild(timeDisplay);
 
-        const btn = document.createElement('button');
-        btn.textContent = 'Restart';
-        btn.addEventListener('click', () => this.restartGame());
-        overlay.appendChild(btn);
+        const btnContainer = document.createElement('div');
+        btnContainer.style.cssText = 'display: flex; gap: 20px; margin-top: 20px;';
 
+        const btnRestart = document.createElement('button');
+        btnRestart.textContent = 'Restart';
+        btnRestart.addEventListener('click', () => this.restartGame());
+        btnContainer.appendChild(btnRestart);
+
+        const btnScoreboard = document.createElement('button');
+        btnScoreboard.textContent = '🏆 View Scoreboard';
+        btnScoreboard.addEventListener('click', () => {
+            // Masquer temporairement l'overlay au lieu de le supprimer
+            overlay.style.display = 'none';
+            this.scoreboard.showScoreboard();
+        });
+        btnContainer.appendChild(btnScoreboard);
+
+        overlay.appendChild(btnContainer);
         document.body.appendChild(overlay);
     }
 
@@ -292,6 +331,11 @@ export class Game {
         // Nettoyer le timer
         if (this.timer) {
             this.timer.destroy();
+        }
+
+        // Nettoyer le scoreboard
+        if (this.scoreboard) {
+            this.scoreboard.hideScoreboard();
         }
     }
 }
