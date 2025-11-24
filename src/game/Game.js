@@ -27,7 +27,7 @@ export class Game {
 
     // Timer
     this.timer = new Timer();
-    this._timerStarted = false; // <--- flag pour démarrer le chrono à la première action
+    this._timerStarted = false; // <--- flag used to start the timer on first user action
 
     // Scoreboard
     this.scoreboard = new Scoreboard(10);
@@ -38,14 +38,14 @@ export class Game {
       this.finishObject = this.findFinishObject();
       this.moveCarToStartIfReady();
 
-      // Build obstacle list and provide to car if present
+      // Build obstacle list and assign it to the car if loaded
       const obstacles = this.buildObstacleList();
       if (this.car) {
         this.car.setScene(this.scene.scene);
         this.car.setObstacles(obstacles);
       }
 
-      // Ne pas démarrer le chronomètre ici, il démarrera à la première action
+      // Do NOT start the timer here — it will start on first player action
     });
 
     window.addEventListener('sceneChanged', () => {
@@ -59,7 +59,7 @@ export class Game {
         this.car.setObstacles(obstacles);
       }
 
-      // Redémarrer le timer quand la scène change mais attendre action du joueur
+      // Reset the timer when the scene changes, but wait for player action before starting
       this.timer.reset();
       this._timerStarted = false;
     });
@@ -84,7 +84,7 @@ export class Game {
       const key = e.key.toLowerCase();
       this.keysPressed[key] = true;
 
-      // Démarrer le chrono à la première action (Z,Q,S,D)
+      // Start the timer on the FIRST player action (Z,Q,S,D)
       if (!this._timerStarted && ['z', 'q', 's', 'd'].includes(key)) {
         this.timer.start();
         this._timerStarted = true;
@@ -93,7 +93,7 @@ export class Game {
 
     window.addEventListener('keyup', e => this.keysPressed[e.key.toLowerCase()] = false);
 
-    // Créer le bouton scoreboard
+    // Create the scoreboard button
     this.scoreboard.createScoreboardButton();
 
     // Render loop
@@ -108,6 +108,7 @@ export class Game {
         const carModel = gltf.scene;
         carModel.scale.set(1, 1, 1);
 
+        // Enable shadows for all meshes in the car model
         carModel.traverse(o => {
           if (o.isMesh) {
             o.castShadow = true;
@@ -123,8 +124,8 @@ export class Game {
         this.controls.enabled = false;
         this.camera.position.set(0, 3, 6);
       },
-      (progress) => console.log(`Chargement voiture : ${(progress.loaded / progress.total) * 100}%`),
-      (error) => console.error('Erreur GLTF : ', error)
+      (progress) => console.log(`Car loading: ${(progress.loaded / progress.total) * 100}%`),
+      (error) => console.error('GLTF error:', error)
     );
   }
 
@@ -145,8 +146,12 @@ export class Game {
 
   updateCameraFollow() {
     const carPos = this.car.object.position;
-    const idealOffset = new THREE.Vector3(0, 5, 12).applyEuler(this.car.object.rotation).add(carPos);
+    const idealOffset = new THREE.Vector3(0, 5, 12)
+      .applyEuler(this.car.object.rotation)
+      .add(carPos);
+
     const idealLookAt = carPos.clone().add(new THREE.Vector3(0, 1.5, 0));
+
     this.camera.position.lerp(idealOffset, 0.15);
     this.camera.lookAt(idealLookAt);
   }
@@ -159,7 +164,7 @@ export class Game {
 
       if (this._timerStarted) this.timer.update();
 
-      // NOUVEAU: Frustum culling manuel pour objets lointains
+      // NEW: Manual frustum culling for far-away objects
       if (!this._frustum) {
         this._frustum = new THREE.Frustum();
         this._frustumMatrix = new THREE.Matrix4();
@@ -171,7 +176,7 @@ export class Game {
       );
       this._frustum.setFromProjectionMatrix(this._frustumMatrix);
 
-      // Désactiver objets hors vue
+      // Disable objects outside of camera view
       this.scene.scene.traverse(obj => {
         if (obj.isMesh && obj.userData.isSelectable) {
           const bbox = new THREE.Box3().setFromObject(obj);
@@ -195,7 +200,10 @@ export class Game {
     let found = null;
     this.scene.scene.traverse(o => {
       if (found) return;
-      if (o.name?.toLowerCase().includes(keyword) || String(o.userData?.source || '').toLowerCase().includes(keyword)) {
+      if (
+        o.name?.toLowerCase().includes(keyword) ||
+        String(o.userData?.source || '').toLowerCase().includes(keyword)
+      ) {
         found = o;
       }
     });
@@ -242,7 +250,11 @@ export class Game {
     const carCenter = this.car.object.position.clone();
     const carBox = new THREE.Box3().setFromObject(this.car.object);
 
-    if (finishBox.containsPoint(carCenter) || (!carBox.isEmpty() && finishBox.intersectsBox(carBox))) {
+    // Check if the car overlaps with or enters the finish zone
+    if (
+      finishBox.containsPoint(carCenter) ||
+      (!carBox.isEmpty() && finishBox.intersectsBox(carBox))
+    ) {
       this.onGameFinish(finish);
     }
   }
@@ -328,9 +340,10 @@ export class Game {
     this.finishObject = this.findFinishObject();
 
     this.timer.reset();
-    this._timerStarted = false; // <--- reset du flag pour nouvelle partie
-    this.timer.start(); // démarrer après la première action
+    this._timerStarted = false; // <--- reset flag for the new game
+    this.timer.start(); // will start again after first movement
 
+    // Reset car physics or fallback to manual reset
     if (this.car?.reset) this.car.reset();
     else if (this.car?.object) {
       this.moveCarToStartIfReady();
@@ -340,9 +353,12 @@ export class Game {
       if (typeof this.car.steering !== 'undefined') this.car.steering = 0;
     }
 
+    // Reset camera position behind the car
     if (this.car?.object && this.camera) {
       const carPos = this.car.object.position.clone();
-      const offset = new THREE.Vector3(0, 5, 12).applyEuler(this.car.object.rotation).add(carPos);
+      const offset = new THREE.Vector3(0, 5, 12)
+        .applyEuler(this.car.object.rotation)
+        .add(carPos);
       this.camera.position.copy(offset);
       this.camera.lookAt(carPos.clone().add(new THREE.Vector3(0,1.5,0)));
     }

@@ -5,28 +5,38 @@ export class EditorUI {
     this.editor = editor;
     this.ui = new UI();
 
-    // Expose ui sur l'editor pour compatibilité avec le code existant (Selection utilise editor.ui)
+    // Expose ui on the editor for compatibility with existing code (Selection uses editor.ui)
     this.editor.ui = this.ui;
 
-    // Connecter les contrôles basiques — ces appels nécessitent que editor ait déjà initialisé
-    // scene, skyboxFiles, skyboxParams, groundTexture, groundParams et sunParams.
+    // Connect basic controls — these calls require that the editor has already initialized
+    // scene, skyboxFiles, skyboxParams, groundTexture, groundParams and sunParams.
     if (this.editor.skyboxFiles && this.editor.skyboxParams && this.editor.scene) {
-      this.ui.addSkyboxUI(this.editor.skyboxFiles, this.editor.skyboxParams, this.editor.scene.addSkybox.bind(this.editor.scene));
+      this.ui.addSkyboxUI(
+        this.editor.skyboxFiles,
+        this.editor.skyboxParams,
+        this.editor.scene.addSkybox.bind(this.editor.scene)
+      );
     }
 
     if (this.editor.groundTexture && this.editor.groundParams && this.editor.scene) {
-      this.ui.addGroundUI(this.editor.groundTexture, this.editor.groundParams, this.editor.scene.changeGround.bind(this.editor.scene));
+      this.ui.addGroundUI(
+        this.editor.groundTexture,
+        this.editor.groundParams,
+        this.editor.scene.changeGround.bind(this.editor.scene)
+      );
     }
 
     if (this.editor.sunParams && this.editor.scene) {
-      this.ui.addSunUI(this.editor.sunParams, this.editor.scene.changeSun.bind(this.editor.scene));
+      this.ui.addSunUI(
+        this.editor.sunParams,
+        this.editor.scene.changeSun.bind(this.editor.scene)
+      );
     }
 
-    // Sélection (visibilité et mise à jour depuis Selection)
+    // Selection (visibility and update from Selection)
     this.ui.addSelectionUI();
 
-    // Import / Export / Clear
-    // Crée un input d'import et passe le callback à UI
+    // Creates an import input and passes the callback to UI
     const importInput = document.createElement('input');
     importInput.type = 'file';
     importInput.accept = '.json,application/json';
@@ -34,7 +44,7 @@ export class EditorUI {
     document.body.appendChild(importInput);
 
     importInput.addEventListener('change', async (event) => {
-      // Prefer sceneManager.importScene if available, else fallback to core scene.importScene
+      // Prefer sceneManager.importScene if available, otherwise fallback to core scene.importScene
       if (this.editor.sceneManager?.importScene) {
         await this.editor.sceneManager.importScene(event, {
           skybox: this.editor.skyboxParams,
@@ -51,7 +61,7 @@ export class EditorUI {
 
     this.ui.addFunction(() => importInput.click());
 
-    // Contrôle clavier (éditeur fournit la propriété keyboardMoveEnabled)
+    // Keyboard control (editor provides the property keyboardMoveEnabled)
     this.ui.addKeyboardControlOption(this.editor);
   }
 

@@ -1,106 +1,114 @@
-// filepath: src/game/Timer.js
 export class Timer {
-    constructor() {
-        this.startTime = null;
-        this.endTime = null;
-        this.isRunning = false;
-        this.elapsedTime = 0;
+  constructor() {
+    this.startTime = null;
+    this.endTime = null;
+    this.isRunning = false;
+    this.elapsedTime = 0;
 
-        // Créer l'élément UI du chronomètre
-        this.createTimerUI();
+    // Create the timer UI element
+    this.createTimerUI();
+  }
+
+  // Create the timer display element (only if it doesn't already exist)
+  createTimerUI() {
+    if (document.getElementById('game-timer')) return;
+
+    const timerElement = document.createElement('div');
+    timerElement.id = 'game-timer';
+    timerElement.textContent = '00:00.000';
+
+    document.body.appendChild(timerElement);
+    this.timerElement = timerElement;
+  }
+
+  // Start the timer
+  start() {
+    if (this.isRunning) return;
+
+    this.startTime = Date.now();
+    this.endTime = null;
+    this.isRunning = true;
+    this.elapsedTime = 0;
+
+    console.log('Timer started');
+
+    // Show the timer on screen
+    if (this.timerElement) {
+      this.timerElement.style.display = 'block';
     }
+  }
 
-    createTimerUI() {
-        // Vérifier si l'élément existe déjà
-        if (document.getElementById('game-timer')) return;
+  // Stop the timer and return the elapsed time in ms
+  stop() {
+    if (!this.isRunning) return;
 
-        const timerElement = document.createElement('div');
-        timerElement.id = 'game-timer';
-        timerElement.textContent = '00:00.000';
+    this.endTime = Date.now();
+    this.isRunning = false;
+    this.elapsedTime = this.endTime - this.startTime;
 
-        document.body.appendChild(timerElement);
-        this.timerElement = timerElement;
+    console.log(`Timer stopped - Time: ${this.getFormattedTime()}`);
+
+    return this.elapsedTime;
+  }
+
+  // Reset the timer values and UI
+  reset() {
+    this.startTime = null;
+    this.endTime = null;
+    this.isRunning = false;
+    this.elapsedTime = 0;
+
+    if (this.timerElement) {
+      this.timerElement.textContent = '00:00.000';
     }
+  }
 
-    start() {
-        if (this.isRunning) return;
+  // Update the timer every frame while running
+  update() {
+    if (!this.isRunning) return;
 
-        this.startTime = Date.now();
-        this.endTime = null;
-        this.isRunning = true;
-        this.elapsedTime = 0;
+    const currentTime = Date.now();
+    this.elapsedTime = currentTime - this.startTime;
 
-        console.log('Chronomètre démarré');
-
-        // Afficher le timer
-        if (this.timerElement) {
-            this.timerElement.style.display = 'block';
-        }
+    if (this.timerElement) {
+      this.timerElement.textContent = this.getFormattedTime();
     }
+  }
 
-    stop() {
-        if (!this.isRunning) return;
+  // Convert milliseconds into MM:SS.mmm format
+  getFormattedTime() {
+    const totalMs = this.elapsedTime;
+    const minutes = Math.floor(totalMs / 60000);
+    const seconds = Math.floor((totalMs % 60000) / 1000);
+    const milliseconds = totalMs % 1000;
 
-        this.endTime = Date.now();
-        this.isRunning = false;
-        this.elapsedTime = this.endTime - this.startTime;
+    return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${String(milliseconds).padStart(3, '0')}`;
+  }
 
-        console.log(`Chronomètre arrêté - Temps: ${this.getFormattedTime()}`);
+  // Return elapsed time in ms
+  getElapsedTime() {
+    return this.elapsedTime;
+  }
 
-        return this.elapsedTime;
+  // Hide the timer UI
+  hide() {
+    if (this.timerElement) {
+      this.timerElement.style.display = 'none';
     }
+  }
 
-    reset() {
-        this.startTime = null;
-        this.endTime = null;
-        this.isRunning = false;
-        this.elapsedTime = 0;
-
-        if (this.timerElement) {
-            this.timerElement.textContent = '00:00.000';
-        }
+  // Show the timer UI
+  show() {
+    if (this.timerElement) {
+      this.timerElement.style.display = 'block';
     }
+  }
 
-    update() {
-        if (!this.isRunning) return;
-
-        const currentTime = Date.now();
-        this.elapsedTime = currentTime - this.startTime;
-
-        if (this.timerElement) {
-            this.timerElement.textContent = this.getFormattedTime();
-        }
+  // Remove the timer UI element from the DOM
+  destroy() {
+    if (this.timerElement) {
+      this.timerElement.remove();
+      this.timerElement = null;
     }
-
-    getFormattedTime() {
-        const totalMs = this.elapsedTime;
-        const minutes = Math.floor(totalMs / 60000);
-        const seconds = Math.floor((totalMs % 60000) / 1000);
-        const milliseconds = totalMs % 1000;
-
-        return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${String(milliseconds).padStart(3, '0')}`;
-    }
-
-    getElapsedTime() {
-        return this.elapsedTime;
-    }
-
-    hide() {
-        if (this.timerElement) {
-            this.timerElement.style.display = 'none';
-        }
-    }
-
-    show() {
-        if (this.timerElement) {
-            this.timerElement.style.display = 'block';
-        }
-    }
-
-    destroy() {
-        if (this.timerElement) {
-            this.timerElement.remove();
-            this.timerElement = null;
-        }
-    }
+  }
 }

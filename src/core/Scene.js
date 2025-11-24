@@ -5,64 +5,69 @@ import { TextureLoader } from 'three/webgpu';
 export class Scene {
 
   constructor() {
+    // Create the main scene
     this.scene = new THREE.Scene();
+
+    // Store loaded models to avoid reloading
     this.loadedModels = {};
+
+    // Ground, sun and helper references
     this.ground = null;
     this.sun = null;
     this.sunHelper = null;
   }
 
-  /*** Lumières ***/
-  addAmbientLight(intensity = 0.15, color = 0xffffff) {  // Réduit pour plus de contraste
+  /*** Lights ***/
+  addAmbientLight(intensity = 0.15, color = 0xffffff) {
+    // Add a soft ambient light to the scene
     const ambient = new THREE.AmbientLight(color, intensity);
     this.scene.add(ambient);
   }
 
   addDirectionalLight(intensity = 5.0, color = 0xffffff, position = [50, 100, 0]) {
+    // Create the main directional light (sun)
     this.sun = new THREE.DirectionalLight(color, intensity);
     this.sun.position.set(...position);
     this.sun.target.position.set(0, 0, 0);
     this.sun.castShadow = true;
 
-    // Configuration pour une zone d'ombres beaucoup plus grande
-    this.sun.shadow.camera.left = -500;    // Augmenté de -100 à -500
-    this.sun.shadow.camera.right = 500;    // Augmenté de 100 à 500
-    this.sun.shadow.camera.top = 500;      // Augmenté de 100 à 500
-    this.sun.shadow.camera.bottom = -500;  // Augmenté de -100 à -500
+    // Configure a very large shadow area
+    this.sun.shadow.camera.left = -500;
+    this.sun.shadow.camera.right = 500;
+    this.sun.shadow.camera.top = 500;
+    this.sun.shadow.camera.bottom = -500;
     this.sun.shadow.camera.near = 1;
-    this.sun.shadow.camera.far = 500;      // Augmenté de 200 à 500
-    this.sun.shadow.mapSize.set(2048, 2048); // Augmenté de 2048 à 4096 pour plus de détails
+    this.sun.shadow.camera.far = 500;
+    this.sun.shadow.mapSize.set(2048, 2048);
 
     this.scene.add(this.sun);
 
+    // Optional debugging helper
     this.sunHelper = new THREE.DirectionalLightHelper(this.sun);
     //this.scene.add(this.sunHelper);
 
     return this.sunHelper;
   }
 
-  addDirectionalLightEditor(intensity = 5.0, color = 0xffffff, position = [50, 100, 0]) {  // Augmenté
-    // Ensure a directional light exists and apply requested parameters
+  addDirectionalLightEditor(intensity = 5.0, color = 0xffffff, position = [50, 100, 0]) {
+    // Update or create the directional light (editor mode)
     if (!this.sun) {
       this.addDirectionalLight(intensity, color, position);
     } else {
-      // update existing sun
       if (color !== undefined) this.sun.color = new THREE.Color(color);
       if (intensity !== undefined) this.sun.intensity = intensity;
-      if (position !== undefined && Array.isArray(position)) this.sun.position.set(...position);
+      if (position !== undefined) this.sun.position.set(...position);
       this.sun.updateMatrixWorld();
     }
 
-    // Ensure helper exists and is added to the scene
+    // Create or update the helper
     if (!this.sunHelper) {
       this.sunHelper = new THREE.DirectionalLightHelper(this.sun);
       this.scene.add(this.sunHelper);
     } else {
-      // update helper to reflect any changes
       try {
         this.sunHelper.update();
-      } catch (e) {
-        // some three versions use different helper APIs; recreate if update fails
+      } catch {
         this.scene.remove(this.sunHelper);
         this.sunHelper = new THREE.DirectionalLightHelper(this.sun);
         this.scene.add(this.sunHelper);
@@ -72,8 +77,9 @@ export class Scene {
     return this.sunHelper;
   }
 
-  /*** Sol ***/
+  /*** Ground ***/
   addGround(texture, repeats = 1) {
+    // Create a large ground plane
     const geometry = new THREE.PlaneGeometry(2048, 2048);
     const material = createStandardMaterial(texture, repeats);
 
@@ -82,10 +88,12 @@ export class Scene {
     this.ground.position.y = 0;
     this.ground.receiveShadow = true;
     this.ground.userData.isSelectable = false;
+
     this.scene.add(this.ground);
   }
 
   changeGround(texture, repeats = 1) {
+    // Replace ground texture
     if (!this.ground) return;
     this.ground.material.dispose();
     this.ground.material = createStandardMaterial(texture, repeats);
@@ -93,6 +101,7 @@ export class Scene {
 
   /*** Skybox ***/
   addSkybox(filename) {
+    // Load and apply a skybox texture
     const loader = new TextureLoader();
     loader.load(`/skybox/${filename}.jpg`, (texture) => {
       texture.mapping = THREE.EquirectangularReflectionMapping;
@@ -101,18 +110,21 @@ export class Scene {
     });
   }
 
-  /*** Soleil ***/
+  /*** Sun properties update ***/
   changeSun({ color, intensity, x, z }) {
+    // Update sun settings
     if (!this.sun) return;
     if (color !== undefined) this.sun.color.set(color);
     if (intensity !== undefined) this.sun.intensity = intensity;
     if (x !== undefined) this.sun.position.x = x;
     if (z !== undefined) this.sun.position.z = z;
+
     this.sun.updateMatrixWorld();
   }
 
-  /*** Gestion des modèles ***/
+  /*** Load scene objects ***/
   async loadScene(url) {
+    // Load scene JSON file
     const response = await fetch(url);
     const data = await response.json();
     const nodes = data.nodes || [];
@@ -120,23 +132,28 @@ export class Scene {
     for (const obj of nodes) {
       const { name, position, rotation, scale } = obj;
 
+      // Load model once and reuse
       if (!this.loadedModels[name]) {
         this.loadedModels[name] = await loadGltf(name);
       }
 
+      // Clone model and apply transform
       const instance = this.loadedModels[name].clone(true);
 
       if (position) instance.position.fromArray(position.split(',').map(Number));
       if (rotation) instance.quaternion.fromArray(rotation.split(',').map(Number));
       if (scale) instance.scale.fromArray(scale.split(',').map(Number));
 
+      // Allow selection
       instance.userData.isSelectable = true;
+
+      // Enable shadows on all meshes
       instance.traverse(o => {
         if (o.isMesh) {
           o.userData.isSelectable = true;
           o.userData.object = instance;
-          o.castShadow = true;     // Activer les ombres portées
-          o.receiveShadow = true;  // Activer la réception des ombres
+          o.castShadow = true;
+          o.receiveShadow = true;
         }
       });
 
@@ -144,14 +161,15 @@ export class Scene {
     }
   }
 
-  /*** Export / Import ***/
+  /*** Export scene to JSON ***/
   exportScene(Ground, skybox) {
+    // Build JSON data
     const sceneData = { ground: Ground || null, skybox: skybox || null, nodes: [] };
 
     this.scene.traverse(obj => {
       if (obj.userData?.isSelectable && (!obj.parent || obj.parent === this.scene)) {
         sceneData.nodes.push({
-          name: obj.name || 'Inconnu',
+          name: obj.name || 'Unknown',
           position: obj.position.toArray().join(','),
           rotation: obj.quaternion.toArray().join(','),
           scale: obj.scale.toArray().join(',')
@@ -159,20 +177,25 @@ export class Scene {
       }
     });
 
+    // Download JSON file
     const blob = new Blob([JSON.stringify(sceneData, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
+
     a.href = url;
     a.download = 'scene_export.json';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
+
     URL.revokeObjectURL(url);
   }
 
+  /*** Clear all models from the scene ***/
   clearScene() {
     const toRemove = new Set();
 
+    // Collect top-level selectable objects
     this.scene.traverse(obj => {
       if (obj.isMesh && obj.userData?.isSelectable) {
         let top = obj;
@@ -181,6 +204,7 @@ export class Scene {
       }
     });
 
+    // Remove objects and free GPU memory
     toRemove.forEach(obj => {
       obj.traverse(child => {
         if (child.isMesh) {
@@ -195,9 +219,11 @@ export class Scene {
       this.scene.remove(obj);
     });
 
+    // Notify listeners
     window.dispatchEvent(new CustomEvent('sceneChanged'));
   }
 
+  /*** Import a saved scene ***/
   async importScene(event, params) {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -207,22 +233,26 @@ export class Scene {
 
     this.clearScene();
 
-    // Ground
+    // Restore ground
     if (data.ground) {
       this.changeGround(data.ground.texture, data.ground.repeats);
       if (params.ground) Object.assign(params.ground, data.ground);
     }
 
-    // Skybox
+    // Restore skybox
     if (data.skybox) {
       this.addSkybox(data.skybox.texture);
       if (params.skybox) params.skybox.texture = data.skybox.texture;
     }
 
-    // Nodes
+    // Restore objects
     for (const obj of data.nodes || []) {
       const { name, position, rotation, scale } = obj;
-      if (!this.loadedModels[name]) this.loadedModels[name] = await loadGltf(name);
+
+      if (!this.loadedModels[name]) {
+        this.loadedModels[name] = await loadGltf(name);
+      }
+
       const instance = this.loadedModels[name].clone(true);
 
       if (position) instance.position.fromArray(position.split(',').map(Number));
@@ -230,17 +260,20 @@ export class Scene {
       if (scale) instance.scale.fromArray(scale.split(',').map(Number));
 
       instance.userData.isSelectable = true;
+
       instance.traverse(o => {
         if (o.isMesh) {
           o.userData.isSelectable = true;
           o.userData.object = instance;
-          o.castShadow = true;     // Activer les ombres portées
-          o.receiveShadow = true;  // Activer la réception des ombres
+          o.castShadow = true;
+          o.receiveShadow = true;
         }
       });
+
       this.scene.add(instance);
     }
 
+    // Restore sun settings
     if (params.sun) this.changeSun(params.sun);
 
     window.dispatchEvent(new CustomEvent('sceneChanged'));

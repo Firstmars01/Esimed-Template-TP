@@ -14,8 +14,7 @@ export class Editor {
     this.dragMode = false;
     this.dragYOffset = null;
 
-
-    // Variables de sélection
+    // Selection variables
     this.selectedObject = null;
     this.selectedMesh = null;
     this.selectedMeshMaterial = null;
@@ -26,7 +25,7 @@ export class Editor {
     this.startScale = null;
     this.dragYOffset = null;
 
-    // Déplacement clavier
+    // Keyboard movement
     this.keyboardMoveEnabled = false;
     this.keysPressed = {};
     this.keyboardSpeed = 0.5;
@@ -37,13 +36,14 @@ export class Editor {
     this.renderer.shadowMap.enabled = true;
     document.body.appendChild(this.renderer.domElement);
 
-    // Raycaster et souris
+    // Raycaster and mouse
     this.raycaster = new THREE.Raycaster();
     this.mouse = new THREE.Vector2();
 
-    // Initialisation de la scène et de la caméra
+    // Scene and camera initialization
     this.scene = new Scene();
-    // create a SceneManager wrapper to handle import/export/clear
+
+    // Create a SceneManager wrapper to handle import/export/clear
     this.sceneManager = new SceneManager(this.scene);
 
     this.scene.loadScene('/scenes/scene_1.json');
@@ -53,33 +53,31 @@ export class Editor {
     this.scene.addDirectionalLight();
     this.scene.addDirectionalLightEditor();
 
-
-    // Paramètres
+    // Parameters
     this.initParams();
     this.scene.addGround(this.groundTexture[3], this.groundParams.repeats);
     this.scene.addSkybox(this.skyboxFiles[0]);
 
-
     // UI (via EditorUI wrapper)
     this.sunParams = { intensity: 2, x: 3, z: 0, color: '#ffffff' };
     this.editorUI = new EditorUI(this);
-    // keep shortcut for existing code
+
+    // Shortcut for existing code
     this.ui = this.editorUI.ui;
 
     // Create Selection helper and pass editor reference
     this.selection = new Selection(this);
 
-    // Lier les écouteurs d'événements (sélection, clavier etc.)
+    // Bind event listeners (selection, keyboard, etc.)
     this.initEventListeners();
 
-    // Exemple de liste de modèles
-    //this.modelList = ['Start', 'Finish', 'Bush', 'Bush red', 'Forest', 'Log', 'Resource Gold', 'Tree', 'Twisted Tree'];
+    // Example model list
     this.modelList = modelList;
 
-    // Après avoir initialisé UI via EditorUI
+    // Add object list to the UI after initializing EditorUI
     this.editorUI.addObjectList(this.modelList, this.addObject.bind(this));
 
-    // Boucle de rendu
+    // Render loop
     this.renderer.setAnimationLoop(this.render.bind(this));
   }
 
@@ -90,64 +88,65 @@ export class Editor {
     this.skyboxParams = { texture: this.skyboxFiles[0] };
   }
 
-  // Fonction pour ajouter le modèle
+  // Function to add a model
   async addObject(modelName) {
     if (!this.scene || !modelName) return;
 
-    // Charger le modèle si nécessaire
+    // Load the model if needed
     if (!this.scene.loadedModels[modelName]) {
       this.scene.loadedModels[modelName] = await loadGltf(modelName);
     }
 
     const instance = this.scene.loadedModels[modelName].clone(true);
-    instance.position.set(0, 0, 0);       // position initiale
-    instance.userData.isSelectable = true; // important pour l'export
+    instance.position.set(0, 0, 0);       // Initial position
+    instance.userData.isSelectable = true; // Important for export
     instance.traverse(o => {
       if (o.isMesh) o.userData.isSelectable = true;
     });
 
     this.scene.scene.add(instance);
-    console.log(`Objet ajouté : ${modelName}`);
+    console.log(`Object added: ${modelName}`);
   }
 
-
   initEventListeners() {
-    // Clic pour sélection -> déléguer à selection
+    // Click for selection -> delegated to Selection
     window.addEventListener('click', this.selection.onClick.bind(this.selection));
 
-    // Déplacement souris -> déléguer à selection
+    // Mouse movement -> delegated to Selection
     window.addEventListener('mousemove', this.selection.onMouseMove.bind(this.selection));
 
-    // Clavier
+    // Keyboard
     window.addEventListener('keydown', (e) => {
       const key = e.key.toLowerCase();
       this.keysPressed[key] = true;
 
       if (key === 'delete') this.selection.deleteSelectedObject();
       if (key === 'a') this.moveSelectedObject = !this.moveSelectedObject;
-      // Empêcher la rotation si l'objet sélectionné a lockRotation
+
+      // Prevent rotation if selected object has lockRotation
       if (key === 'r' && this.selectedObject && !this.selectedObject.userData?.lockRotation) {
         this.rotateSelectedObject = true;
         this.startYRotation = this.selectedObject.rotation.y;
       }
+
       if (key === 'e' && this.selectedObject) {
         this.scaleSelectedObject = true;
         this.startScale = this.selectedObject.scale.clone();
       }
 
-      //activer le mode drag sur touche M ---
+      // Enable drag mode on key M
       if (key === 'm' && this.selectedObject) {
         this.dragMode = !this.dragMode;
-        console.log(`Mode duplication ${this.dragMode ? 'activé' : 'désactivé'}`);
+        console.log(`Duplication mode ${this.dragMode ? 'enabled' : 'disabled'}`);
 
         if (this.dragMode) {
-          // Cloner l'objet sélectionné
+          // Clone the selected object
           this.dragObject = this.selectedObject.clone(true);
           this.dragObject.position.copy(this.selectedObject.position);
           this.dragObject.rotation.copy(this.selectedObject.rotation);
           this.dragObject.scale.copy(this.selectedObject.scale);
 
-          // Restaurer les matériaux d'origine du clone (pas rouge)
+          // Restore original materials on clone (not red)
           this.dragObject.traverse(o => {
             if (o.isMesh) {
               const origMat = this.selectedMeshMaterial;
@@ -157,17 +156,15 @@ export class Editor {
             }
           });
 
-          // Ajouter le clone à la scène
+          // Add clone to scene
           this.scene.scene.add(this.dragObject);
 
-          // Réinitialiser le Y offset
+          // Reset Y-offset
           this.dragYOffset = null;
         } else {
           this.dragObject = null;
         }
       }
-
-
     });
 
     window.addEventListener('keyup', (e) => {
@@ -177,13 +174,13 @@ export class Editor {
       if (key === 'e') this.scaleSelectedObject = false;
     });
 
-    // Export / Clear (délégué vers SceneManager)
+    // Export / Clear (delegated to SceneManager)
     window.addEventListener('exportScene', () => this.sceneManager?.exportScene(this.groundParams, this.skyboxParams));
     window.addEventListener('clearScene', () => this.sceneManager?.clearScene());
   }
 
   render() {
-    // Déplacement clavier
+    // Keyboard movement
     if (this.keyboardMoveEnabled) {
       const dir = new THREE.Vector3();
       const forward = new THREE.Vector3();
@@ -205,11 +202,9 @@ export class Editor {
       if (dir.lengthSq() > 0) {
         dir.normalize().multiplyScalar(this.keyboardSpeed);
         this.camera.position.add(dir);
-        this.controls.target.add(dir); // <— mettre à jour le target
+        this.controls.target.add(dir); // Update the target
       }
     }
-
-
 
     this.renderer.render(this.scene.scene, this.camera);
   }

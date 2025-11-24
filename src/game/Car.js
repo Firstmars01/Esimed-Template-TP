@@ -1,4 +1,3 @@
-
 import * as THREE from 'three';
 import {loadGltfCar} from "../managers/ModelLoader.js";
 
@@ -40,13 +39,13 @@ export class Car {
   }
 
   setModel(model) {
-    // vider uniquement la partie visuelle
+    // clear only the visual part
     this.visual.clear();
     this.visual.add(model);
   }
 
   update(keys) {
-    // --- Accélération / frein ---
+    // --- Acceleration / Brake ---
     if (keys["z"]) this.speed += this.acceleration;
     else if (keys["s"]) this.speed -= this.acceleration * 0.7;
     else this.speed *= this.friction;
@@ -61,7 +60,7 @@ export class Car {
       this.driftEase
     );
 
-    // --- Rotation avec drift (seulement si vitesse suffisante) ---
+    // --- Rotation with drift (only if enough speed) ---
     let turnDir = 0;
     if (Math.abs(this.speed) > 0.01) {
       if (keys["q"]) turnDir = 1;
@@ -104,7 +103,7 @@ export class Car {
       this.boostMaxSpeed
     );
 
-    // --- Mouvement ---
+    // --- Movement ---
     const forward = new THREE.Vector3(0, 0, -1).applyEuler(this.object.rotation);
     const side = new THREE.Vector3(1, 0, 0).applyEuler(this.object.rotation);
 
@@ -115,7 +114,7 @@ export class Car {
     const driftVec = side.clone().multiplyScalar(this.speed * this.driftIntensity * driftDir * 0.15);
     const move = forward.clone().multiplyScalar(this.speed).add(driftVec);
 
-    // --- Détection d'obstacles ---
+    // --- Obstacle detection ---
     if (this.scene && this.speed > 0.01) {
       const origin = this.object.position.clone();
       origin.y += this.rayYOffset;
@@ -145,16 +144,16 @@ export class Car {
 
     this.object.position.add(move);
 
-    // --- Friction supplémentaire en drift ---
+    // --- Extra friction when drifting ---
     this.speed *= this.isDrifting ? this.driftFriction : this.friction;
   }
 
-  // --- Charger un modèle ---
+  // --- Load a model ---
   async loadModel(modelName, scene) {
     if (!modelName || !scene) return;
 
     try {
-      // Vider ancien modèle
+      // Clear previous model
       this.visual.children.forEach(child => {
         this.visual.remove(child);
         child.traverse(c => {
@@ -197,10 +196,10 @@ export class Car {
 
       this.setScene(scene);
 
-      console.log(`${modelName} chargé avec succès !`);
+      console.log(`${modelName} loaded successfully!`);
     } catch (err) {
-      console.error(`Erreur lors du chargement de la voiture ${modelName}:`, err);
-      alert(`Impossible de charger la voiture ${modelName}. Vérifie le fichier dans /models/`);
+      console.error(`Error loading car ${modelName}:`, err);
+      alert(`Unable to load car ${modelName}. Check the file in /models/`);
     }
   }
 

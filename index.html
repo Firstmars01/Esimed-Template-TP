@@ -10,8 +10,8 @@
 <body>
 <div id="mainMenu" class="menu">
     <h1>Low Rally Simulator</h1>
-    <button id="playBtn">Jouer</button>
-    <button id="editorBtn">Créer une map</button>
+    <button id="playBtn">Play</button>
+    <button id="editorBtn">Create a map</button>
 </div>
 <div id="loader" style="display:none;">
     <div class="spinner">
@@ -21,39 +21,39 @@
     </div>
 </div>
 
-<!-- Bouton Home -->
-<button id="btnHome" class="homeButton hidden" title="Accueil">
+<!-- Home button -->
+<button id="btnHome" class="homeButton hidden" title="Home">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="30" height="30" fill="white">
         <path d="M12 3l9 8h-3v9h-4v-6h-4v6H6v-9H3l9-8z"/>
     </svg>
 </button>
 
 
-<!-- Menu in-game, caché par défaut -->
+<!-- In-game menu, hidden by default -->
 <div id="inGameMenu" style="display:none;">
-    <button id="btnCommands">Commandes</button>
-    <button id="btnLoadMap">Changer de map</button>
-    <button id="btnChangeCar">Changer de voiture</button>
+    <button id="btnCommands">Commands</button>
+    <button id="btnLoadMap">Change Map</button>
+    <button id="btnChangeCar">Change Car</button>
 
     <div id="commandsPanel" style="display:none;">
-        <h3>Commandes</h3>
-        <p>Z — Avancer</p>
-        <p>S — Reculer</p>
-        <p>Q — Gauche</p>
-        <p>D — Droite</p>
-        <p>Espace — Drift</p>
-        <p>MAJ - Boost</p>
+        <h3>Controls</h3>
+        <p>Z — Forward</p>
+        <p>S — Backward</p>
+        <p>Q — Left</p>
+        <p>D — Right</p>
+        <p>Space — Drift</p>
+        <p>Shift — Boost</p>
     </div>
 
     <div id="loadMapPanel" style="display:none;">
         <h3>Maps</h3>
-        <!-- Bouton pour parcourir et charger un fichier JSON -->
+        <!-- Button to browse and load a JSON file -->
         <input type="file" id="fileMapInput" accept=".json" style="display:none;">
-        <button class="mapButton" id="btnBrowseMap">Charger depuis PC</button>
+        <button class="mapButton" id="btnBrowseMap">Load from PC</button>
     </div>
 
     <div id="carPanel" style="display:none;">
-        <h3>Voitures</h3>
+        <h3>Cars</h3>
         <div id="carButtons"></div>
     </div>
 
@@ -61,14 +61,14 @@
 
 <div id="editorMenu" style="display:none;">
     <div id="EditorCommandsPanel" style="display:none;">
-        <h3>Commandes de l'éditeur</h3>
-        <p>Clic gauche — Sélectionner / désélectionner un objet</p>
-        <p>Delete — Supprimer l'objet sélectionné</p>
-        <p>A — Basculer le mode déplacement d'objet</p>
-        <p>R — Activer la rotation (maintenir R et bouger la souris)</p>
-        <p>E — Activer le scale (maintenir E et bouger la souris)</p>
-        <p>M — Mode duplication / drag (basculer)</p>
-        <p>Z Q S D — Déplacement caméra (si activé)</p>
+        <h3>Editor Controls</h3>
+        <p>Left click — Select / Deselect object</p>
+        <p>Delete — Delete selected object</p>
+        <p>A — Toggle object move mode</p>
+        <p>R — Enable rotation (hold R and move mouse)</p>
+        <p>E — Enable scale (hold E and move mouse)</p>
+        <p>M — Duplication / drag mode (toggle)</p>
+        <p>Z Q S D — Camera movement (if enabled)</p>
     </div>
 </div>
 
@@ -79,7 +79,7 @@
         <button id="close-scoreboard" class="close-btn">Back</button>
     </div>
     <div id="scoreboard-content" class="scoreboard-content">
-        <!-- Les scores seront injectés ici par JavaScript -->
+        <!-- Scores will be injected here by JavaScript -->
     </div>
     <div class="scoreboard-actions">
         <button id="clear-scores-btn" class="danger-btn">Clear All Scores</button>
@@ -90,6 +90,4 @@
 <script type="module" src="/src/ui/menu.js"></script>
 
 </body>
-
-
 </html>

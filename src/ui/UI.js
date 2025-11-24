@@ -7,9 +7,9 @@ export class UI {
     this.selectionFolder = null;
   }
 
-  /*** Fonctions globales (Export, Clear, Import) ***/
+  /*** Global functions (Export, Clear, Import) ***/
   addFunction(importCallback) {
-    const folder = this.gui.addFolder('Fonctions');
+    const folder = this.gui.addFolder('Functions');
 
     folder.add(this, 'exportScene').name('Export scene to JSON');
     folder.add(this, 'clearScene').name('Clear scene');
@@ -46,7 +46,7 @@ export class UI {
     folder.add(params, 'z', -1000, 1000).onChange(() => onChange(params));
   }
 
-  /*** Sélection d’objet ***/
+  /*** Object selection ***/
   addSelectionUI() {
     this.selectionData = {
       name: '',
@@ -55,7 +55,7 @@ export class UI {
       scaleX: 0, scaleY: 0, scaleZ: 0
     };
 
-    this.selectionFolder = this.gui.addFolder('Objet sélectionné');
+    this.selectionFolder = this.gui.addFolder('Selected Object');
 
     const fields = [
       'name',
@@ -66,7 +66,7 @@ export class UI {
 
     fields.forEach(field => this.selectionFolder.add(this.selectionData, field).listen());
 
-    this.selectionFolder.hide(); // caché par défaut
+    this.selectionFolder.hide(); // hidden by default
   }
 
   updateSelection(obj) {
@@ -75,7 +75,7 @@ export class UI {
       return;
     }
 
-    // Mise à jour des valeurs
+    // Update values
     this.selectionData.name = obj.name || '';
     ['pos', 'rot', 'scale'].forEach(prefix => {
       ['X', 'Y', 'Z'].forEach(axis => {
@@ -86,18 +86,18 @@ export class UI {
     this.selectionFolder.show();
   }
 
-  /*** Contrôle clavier ***/
+  /*** Keyboard control ***/
   addKeyboardControlOption(params) {
-    const folder = this.gui.addFolder('Contrôle clavier');
-    folder.add(params, 'keyboardMoveEnabled').name('Déplacement clavier ZQSD');
+    const folder = this.gui.addFolder('Keyboard Control');
+    folder.add(params, 'keyboardMoveEnabled').name('Keyboard movement ZQSD');
   }
 
-  /*** Ajouter objet depuis une liste ***/
+  /*** Add object from a list ***/
   addObjectFromListUI(models, addObjectCallback) {
-    const folder = this.gui.addFolder('Ajouter objet');
+    const folder = this.gui.addFolder('Add Object');
     const params = { selectedModel: models[0] || '' };
 
-    folder.add(params, 'selectedModel', models).name('Modèle');
-    folder.add({ add: () => addObjectCallback(params.selectedModel) }, 'add').name('Ajouter');
+    folder.add(params, 'selectedModel', models).name('Model');
+    folder.add({ add: () => addObjectCallback(params.selectedModel) }, 'add').name('Add');
   }
 }
