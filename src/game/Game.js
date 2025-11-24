@@ -1,9 +1,9 @@
 import * as THREE from 'three/webgpu';
-import { Scene } from '../core/scene.js';
-import { Camera } from '../core/camera.js';
+import { Scene } from '../core/Scene.js';
+import { Camera } from '../core/Camera.js';
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { Car } from './car.js';
+import { Car } from './Car.js';
 import { SceneManager } from '../managers/SceneManager.js';
 import { Timer } from './Timer.js';
 import { Scoreboard } from './Scoreboard.js';
@@ -17,7 +17,7 @@ export class Game {
 
         // Scene & Camera
         this.scene = new Scene();
-        // expose sceneManager for external APIs (menu.js expects app.sceneManager)
+        // expose sceneManager for external APIs (Menu.js expects app.sceneManager)
         this.sceneManager = new SceneManager(this.scene);
 
         this._sceneLoaded = false;

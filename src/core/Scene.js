@@ -1,5 +1,5 @@
 import * as THREE from 'three/webgpu';
-import { createStandardMaterial, loadGltf } from '../managers/modelLoader.js';
+import { createStandardMaterial, loadGltf } from '../managers/ModelLoader.js';
 import { TextureLoader } from 'three/webgpu';
 
 export class Scene {

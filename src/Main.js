@@ -1,6 +1,6 @@
 import './style.css';
-import { Editor } from "./editor/editor.js";
-import { Game } from "./game/game.js";
+import { Editor } from "./editor/Editor.js";
+import { Game } from "./game/Game.js";
 
 // --- Références globales ---
 let currentGame;

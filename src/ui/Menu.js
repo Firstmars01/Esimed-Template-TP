@@ -1,6 +1,6 @@
-import { startApp, disposeCurrent, getSceneApi, getThreeScene } from "../main.js";
-import { Game } from "../game/game.js";
-import { Editor } from "../editor/editor.js";
+import { startApp, disposeCurrent, getSceneApi, getThreeScene } from "../Main.js";
+import { Game } from "../game/Game.js";
+import { Editor } from "../editor/Editor.js";
 
 // --- Sélecteurs UI ---
 const mainMenu = document.getElementById('mainMenu');

@@ -1,5 +1,5 @@
-import { Scene } from '../core/scene.js';
-import { loadGltf } from './modelLoader.js';
+import { Scene } from '../core/Scene.js';
+import { loadGltf } from './ModelLoader.js';
 
 export class SceneManager {
   constructor(existingScene) {
@@ -16,7 +16,7 @@ export class SceneManager {
     return this.scene.scene;
   }
 
-  // Helper to expose some scene values (used by menu.js)
+  // Helper to expose some scene values (used by Menu.js)
   getSceneWrapper() {
     return {
       sun: this.scene.sun ?? null,

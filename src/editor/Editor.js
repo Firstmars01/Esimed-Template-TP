@@ -1,9 +1,9 @@
 import * as THREE from 'three/webgpu';
-import { Scene } from "../core/scene.js";
-import { Camera } from "../core/camera.js";
+import { Scene } from "../core/Scene.js";
+import { Camera } from "../core/Camera.js";
 import { OrbitControls } from "three/examples/jsm/Addons.js";
-import { EditorUI } from './editorUI.js';
-import {loadGltf} from "../managers/modelLoader.js";
+import { EditorUI } from './EditorUI.js';
+import {loadGltf} from "../managers/ModelLoader.js";
 import { Selection } from './Selection.js';
 import { SceneManager } from '../managers/SceneManager.js';
 

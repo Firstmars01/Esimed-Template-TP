@@ -1,4 +1,4 @@
-import { UI } from '../ui/ui.js';
+import { UI } from '../ui/UI.js';
 
 export class GameUI {
   constructor(game) {
