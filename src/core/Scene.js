@@ -31,7 +31,7 @@ export class Scene {
     this.sun.shadow.camera.bottom = -500;  // Augmenté de -100 à -500
     this.sun.shadow.camera.near = 1;
     this.sun.shadow.camera.far = 500;      // Augmenté de 200 à 500
-    this.sun.shadow.mapSize.set(4096, 4096); // Augmenté de 2048 à 4096 pour plus de détails
+    this.sun.shadow.mapSize.set(2048, 2048); // Augmenté de 2048 à 4096 pour plus de détails
 
     this.scene.add(this.sun);
 

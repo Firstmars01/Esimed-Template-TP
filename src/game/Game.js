@@ -158,7 +158,28 @@ export class Game {
       this.checkFinishCollision();
 
       if (this._timerStarted) this.timer.update();
+
+      // NOUVEAU: Frustum culling manuel pour objets lointains
+      if (!this._frustum) {
+        this._frustum = new THREE.Frustum();
+        this._frustumMatrix = new THREE.Matrix4();
+      }
+
+      this._frustumMatrix.multiplyMatrices(
+        this.camera.projectionMatrix,
+        this.camera.matrixWorldInverse
+      );
+      this._frustum.setFromProjectionMatrix(this._frustumMatrix);
+
+      // Désactiver objets hors vue
+      this.scene.scene.traverse(obj => {
+        if (obj.isMesh && obj.userData.isSelectable) {
+          const bbox = new THREE.Box3().setFromObject(obj);
+          obj.visible = this._frustum.intersectsBox(bbox);
+        }
+      });
     }
+
     this.renderer.render(this.scene.scene, this.camera);
   }
 

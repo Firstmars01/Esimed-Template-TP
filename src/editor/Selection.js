@@ -14,6 +14,10 @@ export class Selection {
 
         // Local helper (not stored on editor)
         this._groundPlane = null;
+
+        //Cache de matériaux
+      this._redMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+      this._redMaterialArray = null;
     }
 
     deleteSelectedObject() {
@@ -31,10 +35,10 @@ export class Selection {
         console.log('Objet supprimé');
     }
 
-    clearSelection() {
-        if (this.editor.selectedMesh && this.editor.selectedMeshMaterial) {
-            this.editor.selectedMesh.material = this.editor.selectedMeshMaterial;
-        }
+  clearSelection() {
+    if (this.editor.selectedMesh && this.editor.selectedMeshMaterial) {
+      this.editor.selectedMesh.material = this.editor.selectedMeshMaterial;
+    }
         this.editor.selectedObject = null;
         this.editor.selectedMesh = null;
         this.editor.selectedMeshMaterial = null;
@@ -73,10 +77,21 @@ export class Selection {
         if (this.editor.selectedMesh && this.editor.selectedMeshMaterial) this.editor.selectedMesh.material = this.editor.selectedMeshMaterial;
 
         // Cloner matériau
-        const origMat = mesh.material;
-        this.editor.selectedMeshMaterial = Array.isArray(origMat)
-            ? origMat.map(m => (m?.clone ? m.clone() : m))
-            : (origMat?.clone ? origMat.clone() : origMat);
+      const origMat = mesh.material;
+      this.editor.selectedMeshMaterial = origMat; // Garder référence originale
+
+      this.editor.selectedMesh = mesh;
+      this.editor.selectedObject = top;
+
+      // Appliquer matériau rouge depuis le cache
+      if (Array.isArray(origMat)) {
+        if (!this._redMaterialArray || this._redMaterialArray.length !== origMat.length) {
+          this._redMaterialArray = origMat.map(() => this._redMaterial);
+        }
+        mesh.material = this._redMaterialArray;
+      } else {
+        mesh.material = this._redMaterial;
+      }
 
         this.editor.selectedMesh = mesh;
         this.editor.selectedObject = top;

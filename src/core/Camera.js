@@ -16,13 +16,3 @@ export class Camera {
     }
 
 }
-
-export class OrbitControls {
-
-    constructor(camera, domElement) {
-      const controls = new OrbitControls(this.camera, this.renderer.domElement)
-      controls.target.set(0, 0, 0)
-      controls.update()
-    }
-
-}

@@ -5,28 +5,40 @@ import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js'
 export const textureloader = new THREE.TextureLoader()
 const gltfLoader = new GLTFLoader()
 
-export const loadGltf = function (filename) {
-    return new Promise((resolve, reject) => {
-        gltfLoader.load(
-            `/models/${filename}.glb`,
-            (gltf) => {
-                const mesh = gltf.scene
-                mesh.name = filename
-                mesh.traverse(o => {
-                    if (o.isMesh) {
-                        o.castShadow = true;
-                        o.receiveShadow = true;
-                    }})
-                resolve(mesh)
-            },
-            undefined,
-            (error) => {
-                console.error(`Error loading ${filename}:`, error)
-                reject(error)
+export const loadGltf = function (filename, useLOD = true) {
+  return new Promise((resolve, reject) => {
+    gltfLoader.load(
+      `/models/${filename}.glb`,
+      (gltf) => {
+        const mesh = gltf.scene;
+        mesh.name = filename;
+
+        mesh.traverse(o => {
+          if (o.isMesh) {
+            o.castShadow = true;
+            o.receiveShadow = true;
+
+            // NOUVEAU: Simplifier géométries lointaines
+            if (useLOD && o.geometry) {
+              const vertexCount = o.geometry.attributes.position.count;
+              if (vertexCount > 1000) {
+                // Marquer pour LOD
+                o.userData.needsLOD = true;
+              }
             }
-        );
-    });
-}
+          }
+        });
+
+        resolve(mesh);
+      },
+      undefined,
+      (error) => {
+        console.error(`Error loading ${filename}:`, error);
+        reject(error);
+      }
+    );
+  });
+};
 
 export const loadGltfCar = function (filename) {
     return new Promise((resolve, reject) => {
