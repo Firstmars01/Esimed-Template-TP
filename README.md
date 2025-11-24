@@ -1,5 +1,7 @@
 # Esimed-Template-TP
 
+# Projet à rendre dans la branche Projet-Rally
+
 Description
 - Template de TP pour rendu WebGPU avec `three/webgpu`.
 - Gestion de scène, import/export JSON, chargement de modèles GLTF, sol, skybox et éclairage directionnel.
