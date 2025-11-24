@@ -1,4 +1,4 @@
-// filepath: c:\Users\cleme\WebstormProjects\Esimed-Template-TP\src\Car.js
+
 import * as THREE from 'three';
 import {loadGltfCar} from "../managers/ModelLoader.js";
 

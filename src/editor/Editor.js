@@ -6,6 +6,7 @@ import { EditorUI } from './EditorUI.js';
 import {loadGltf} from "../managers/ModelLoader.js";
 import { Selection } from './Selection.js';
 import { SceneManager } from '../managers/SceneManager.js';
+import { groundTextures, skyboxFiles, modelList } from '../editor/Param.js';
 
 export class Editor {
 
@@ -72,7 +73,8 @@ export class Editor {
     this.initEventListeners();
 
     // Exemple de liste de modèles
-    this.modelList = ['Start', 'Finish', 'Bush', 'Bush red', 'Forest', 'Log', 'Resource Gold', 'Tree', 'Twisted Tree'];
+    //this.modelList = ['Start', 'Finish', 'Bush', 'Bush red', 'Forest', 'Log', 'Resource Gold', 'Tree', 'Twisted Tree'];
+    this.modelList = modelList;
 
     // Après avoir initialisé UI via EditorUI
     this.editorUI.addObjectList(this.modelList, this.addObject.bind(this));
@@ -82,9 +84,9 @@ export class Editor {
   }
 
   initParams() {
-    this.groundTexture = ['aerial_grass_rock','brown_mud_leaves_01','forest_floor','forrest_ground_01','gravelly_sand'];
+    this.groundTexture = groundTextures;
     this.groundParams = { texture: this.groundTexture[0], repeats: 500 };
-    this.skyboxFiles = ['DaySkyHDRI019A_2K-TONEMAPPED','DaySkyHDRI050A_2K-TONEMAPPED','NightSkyHDRI009_2K-TONEMAPPED', 'citrus_orchard_road_puresky'];
+    this.skyboxFiles = skyboxFiles;
     this.skyboxParams = { texture: this.skyboxFiles[0] };
   }
 

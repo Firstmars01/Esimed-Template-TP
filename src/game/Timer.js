@@ -45,7 +45,7 @@ export class Timer {
         this.isRunning = false;
         this.elapsedTime = this.endTime - this.startTime;
 
-        console.log(`⏱️ Chronomètre arrêté - Temps: ${this.getFormattedTime()}`);
+        console.log(`Chronomètre arrêté - Temps: ${this.getFormattedTime()}`);
 
         return this.elapsedTime;
     }
