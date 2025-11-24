@@ -1,19 +1,12 @@
 // filepath: c:\Users\cleme\WebstormProjects\Esimed-Template-TP\src\Car.js
 import * as THREE from 'three';
-import { loadGltfCar } from "../managers/ModelLoader.js";
+import {loadGltfCar} from "../managers/ModelLoader.js";
 
 export class Car {
   constructor() {
     this.object = new THREE.Group();
     this.visual = new THREE.Group();
     this.object.add(this.visual);
-
-    // --- Hitbox invisible ---
-    this.hitbox = new THREE.Mesh(
-      new THREE.BoxGeometry(1.8, 1.2, 3.5), // plus grosse que le modèle
-      new THREE.MeshBasicMaterial({ visible: false })
-    );
-    this.visual.add(this.hitbox);
 
     // Speed
     this.speed = 0;
@@ -39,17 +32,17 @@ export class Car {
 
     // --- Obstacle detection (Raycaster) ---
     this.raycaster = new THREE.Raycaster();
-    this.stopDistance = 2.0; // augmenté pour la grosse hitbox
-    this.brakeDistance = 5.0;
+    this.stopDistance = 1.5;
+    this.brakeDistance = 4.0;
     this.rayYOffset = 0.5;
     this.scene = null;
     this.obstacleList = null;
   }
 
   setModel(model) {
+    // vider uniquement la partie visuelle
     this.visual.clear();
     this.visual.add(model);
-    this.visual.add(this.hitbox); // réajoute la hitbox invisible
   }
 
   update(keys) {
@@ -68,7 +61,7 @@ export class Car {
       this.driftEase
     );
 
-    // --- Rotation avec drift ---
+    // --- Rotation avec drift (seulement si vitesse suffisante) ---
     let turnDir = 0;
     if (Math.abs(this.speed) > 0.01) {
       if (keys["q"]) turnDir = 1;
@@ -77,6 +70,7 @@ export class Car {
       const driftTurn = turnDir * this.turnSpeed * (1 + this.driftIntensity * this.maxDriftAngle);
 
       if (!this.targetRotationY) this.targetRotationY = this.object.rotation.y;
+
       this.targetRotationY += driftTurn;
 
       this.object.rotation.y = THREE.MathUtils.lerp(
@@ -88,18 +82,27 @@ export class Car {
       const maxTilt = 0.15;
       const targetTilt = -turnDir * this.driftIntensity * maxTilt;
       this.visual.rotation.z = THREE.MathUtils.lerp(this.visual.rotation.z, targetTilt, 0.2);
+
     } else {
       this.visual.rotation.z = THREE.MathUtils.lerp(this.visual.rotation.z, 0, 0.2);
       this.targetRotationY = this.object.rotation.y;
     }
 
-    // --- Boost ---
-    if (keys["shift"]) this.currentBoost = this.boostPower;
+    // BOOST - shift
+    if (keys["shift"]) {
+      this.currentBoost = this.boostPower;
+    }
+
     if (this.currentBoost > 0) {
       this.speed += this.currentBoost;
       this.currentBoost *= this.boostDecay;
     }
-    this.speed = THREE.MathUtils.clamp(this.speed, -this.maxSpeed, this.boostMaxSpeed);
+
+    this.speed = THREE.MathUtils.clamp(
+      this.speed,
+      -this.maxSpeed,
+      this.boostMaxSpeed
+    );
 
     // --- Mouvement ---
     const forward = new THREE.Vector3(0, 0, -1).applyEuler(this.object.rotation);
@@ -112,34 +115,41 @@ export class Car {
     const driftVec = side.clone().multiplyScalar(this.speed * this.driftIntensity * driftDir * 0.15);
     const move = forward.clone().multiplyScalar(this.speed).add(driftVec);
 
-    // --- Vérification avant déplacement (hitbox) ---
-    const nextPosition = this.object.position.clone().add(move);
-    let canMove = true;
-
+    // --- Détection d'obstacles ---
     if (this.scene && this.speed > 0.01) {
-      const origin = nextPosition.clone();
+      const origin = this.object.position.clone();
       origin.y += this.rayYOffset;
+      const dir = forward.clone().normalize();
 
-      this.raycaster.set(origin, forward.clone().normalize());
+      const rayLen = Math.max(this.stopDistance, Math.abs(this.speed) * 1.5 + this.stopDistance);
+      this.raycaster.set(origin, dir);
 
       const candidates = this.obstacleList || this.scene.children;
       const intersects = this.raycaster
         .intersectObjects(candidates, true)
         .filter(i => !this._isIgnored(i.object));
 
-      if (intersects.length > 0 && intersects[0].distance <= this.stopDistance) {
-        canMove = false;
-        this.speed = 0;
-        this.currentBoost = 0;
+      if (intersects.length > 0) {
+        const hit = intersects[0];
+
+        if (hit.distance <= this.stopDistance) {
+          this.speed = 0;
+          this.currentBoost = 0;
+        } else if (hit.distance <= rayLen && hit.distance <= this.brakeDistance) {
+          const t = hit.distance / this.brakeDistance;
+          const brakeFactor = THREE.MathUtils.clamp(t, 0.1, 1);
+          this.speed *= brakeFactor;
+        }
       }
     }
 
-    if (canMove) this.object.position.copy(nextPosition);
+    this.object.position.add(move);
 
     // --- Friction supplémentaire en drift ---
     this.speed *= this.isDrifting ? this.driftFriction : this.friction;
   }
 
+  // --- Charger un modèle ---
   async loadModel(modelName, scene) {
     if (!modelName || !scene) return;
 
