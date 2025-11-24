@@ -42,8 +42,8 @@ export class UI {
     const folder = this.gui.addFolder('Sun');
     folder.addColor(params, 'color').onChange(() => onChange(params));
     folder.add(params, 'intensity', 0, 10).onChange(() => onChange(params));
-    folder.add(params, 'x', -100, 100).onChange(() => onChange(params));
-    folder.add(params, 'z', -100, 100).onChange(() => onChange(params));
+    folder.add(params, 'x', -1000, 1000).onChange(() => onChange(params));
+    folder.add(params, 'z', -1000, 1000).onChange(() => onChange(params));
   }
 
   /*** Sélection d’objet ***/
