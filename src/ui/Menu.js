@@ -120,7 +120,7 @@ document.addEventListener('click', (e) => {
 // --- Charger dynamiquement les boutons des voitures ---
 async function loadCarButtons() {
     try {
-        const response = await fetch('/models/car/cars.json');
+        const response = await fetch('/Param/cars.json');
         const cars = await response.json();
 
         const container = document.getElementById('carPanel');

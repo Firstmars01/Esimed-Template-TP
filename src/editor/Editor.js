@@ -6,7 +6,7 @@ import { EditorUI } from './EditorUI.js';
 import {loadGltf} from "../managers/ModelLoader.js";
 import { Selection } from './Selection.js';
 import { SceneManager } from '../managers/SceneManager.js';
-import { groundTextures, skyboxFiles, modelList } from '../editor/Param.js';
+import { groundTextures, skyboxFiles, modelList } from '../Param/Param.js';
 
 export class Editor {
 

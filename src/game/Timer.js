@@ -30,7 +30,7 @@ export class Timer {
         this.isRunning = true;
         this.elapsedTime = 0;
 
-        console.log('⏱️ Chronomètre démarré');
+        console.log('Chronomètre démarré');
 
         // Afficher le timer
         if (this.timerElement) {
