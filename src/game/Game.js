@@ -11,9 +11,10 @@ import { Scoreboard } from './Scoreboard.js';
 export class Game {
     constructor() {
         // Renderer
-        this.renderer = new THREE.WebGPURenderer();
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(this.renderer.domElement);
+      this.renderer = new THREE.WebGPURenderer({ antialias: true });
+      this.renderer.setSize(window.innerWidth, window.innerHeight);
+      this.renderer.shadowMap.enabled = true;
+      document.body.appendChild(this.renderer.domElement);
 
         // Scene & Camera
         this.scene = new Scene();
@@ -91,29 +92,34 @@ export class Game {
         this.renderer.setAnimationLoop(this.render.bind(this));
     }
 
-    loadCar() {
-        const loader = new GLTFLoader();
-        loader.load(
-            '/models/car/Dodge Challenger.glb',
-            (gltf) => {
-                const carModel = gltf.scene;
-                carModel.scale.set(1, 1, 1);
-                this.car.setModel(carModel);
+  loadCar() {
+    const loader = new GLTFLoader();
+    loader.load(
+      '/models/car/Dodge Challenger.glb',
+      (gltf) => {
+        const carModel = gltf.scene;
+        carModel.scale.set(1, 1, 1);
 
-                this.scene.scene.add(this.car.object);
+        // Activer les ombres pour la voiture
+        carModel.traverse(o => {
+          if (o.isMesh) {
+            o.castShadow = true;
+            o.receiveShadow = true;
+          }
+        });
 
-                // Provide scene & obstacles to car for collision detection
-                this.car.setScene(this.scene.scene);
-                this.car.setObstacles(this.buildObstacleList());
-
-                this.moveCarToStartIfReady();
-                this.controls.enabled = false;
-                this.camera.position.set(0, 3, 6);
-            },
-            (progress) => console.log(`Chargement voiture : ${(progress.loaded / progress.total) * 100}%`),
-            (error) => console.error('Erreur GLTF : ', error)
-        );
-    }
+        this.car.setModel(carModel);
+        this.scene.scene.add(this.car.object);
+        this.car.setScene(this.scene.scene);
+        this.car.setObstacles(this.buildObstacleList());
+        this.moveCarToStartIfReady();
+        this.controls.enabled = false;
+        this.camera.position.set(0, 3, 6);
+      },
+      (progress) => console.log(`Chargement voiture : ${(progress.loaded / progress.total) * 100}%`),
+      (error) => console.error('Erreur GLTF : ', error)
+    );
+  }
 
     // --- Build a filtered list of obstacle meshes from the scene ---
     buildObstacleList() {

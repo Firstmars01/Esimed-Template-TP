@@ -13,23 +13,25 @@ export class Scene {
   }
 
   /*** Lumières ***/
-  addAmbientLight(intensity = 0.3, color = 0xffffff) {
+  addAmbientLight(intensity = 0.15, color = 0xffffff) {  // Réduit pour plus de contraste
     const ambient = new THREE.AmbientLight(color, intensity);
     this.scene.add(ambient);
   }
 
-  addDirectionalLight(intensity = 3.0, color = 0xffffff, position = [50, 100, 0]) {
+  addDirectionalLight(intensity = 5.0, color = 0xffffff, position = [50, 100, 0]) {
     this.sun = new THREE.DirectionalLight(color, intensity);
     this.sun.position.set(...position);
     this.sun.target.position.set(0, 0, 0);
     this.sun.castShadow = true;
-    this.sun.shadow.camera.left = -100;
-    this.sun.shadow.camera.right = 100;
-    this.sun.shadow.camera.top = 100;
-    this.sun.shadow.camera.bottom = -100;
+
+    // Configuration pour une zone d'ombres beaucoup plus grande
+    this.sun.shadow.camera.left = -500;    // Augmenté de -100 à -500
+    this.sun.shadow.camera.right = 500;    // Augmenté de 100 à 500
+    this.sun.shadow.camera.top = 500;      // Augmenté de 100 à 500
+    this.sun.shadow.camera.bottom = -500;  // Augmenté de -100 à -500
     this.sun.shadow.camera.near = 1;
-    this.sun.shadow.camera.far = 200;
-    this.sun.shadow.mapSize.set(2048, 2048);
+    this.sun.shadow.camera.far = 500;      // Augmenté de 200 à 500
+    this.sun.shadow.mapSize.set(4096, 4096); // Augmenté de 2048 à 4096 pour plus de détails
 
     this.scene.add(this.sun);
 
@@ -39,7 +41,7 @@ export class Scene {
     return this.sunHelper;
   }
 
-  addDirectionalLightEditor(intensity = 3.0, color = 0xffffff, position = [50, 100, 0]) {
+  addDirectionalLightEditor(intensity = 5.0, color = 0xffffff, position = [50, 100, 0]) {  // Augmenté
     // Ensure a directional light exists and apply requested parameters
     if (!this.sun) {
       this.addDirectionalLight(intensity, color, position);
@@ -128,14 +130,15 @@ export class Scene {
       if (rotation) instance.quaternion.fromArray(rotation.split(',').map(Number));
       if (scale) instance.scale.fromArray(scale.split(',').map(Number));
 
-      instance.userData.isSelectable = true; // <-- IMPORTANT
+      instance.userData.isSelectable = true;
       instance.traverse(o => {
         if (o.isMesh) {
           o.userData.isSelectable = true;
-          o.userData.object = instance; // parent root
+          o.userData.object = instance;
+          o.castShadow = true;     // Activer les ombres portées
+          o.receiveShadow = true;  // Activer la réception des ombres
         }
       });
-
 
       this.scene.add(instance);
     }
@@ -147,7 +150,6 @@ export class Scene {
 
     this.scene.traverse(obj => {
       if (obj.userData?.isSelectable && (!obj.parent || obj.parent === this.scene)) {
-        // on n'exporte que les parents root
         sceneData.nodes.push({
           name: obj.name || 'Inconnu',
           position: obj.position.toArray().join(','),
@@ -156,8 +158,6 @@ export class Scene {
         });
       }
     });
-
-
 
     const blob = new Blob([JSON.stringify(sceneData, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -196,7 +196,6 @@ export class Scene {
     });
 
     window.dispatchEvent(new CustomEvent('sceneChanged'));
-
   }
 
   async importScene(event, params) {
@@ -230,11 +229,13 @@ export class Scene {
       if (rotation) instance.quaternion.fromArray(rotation.split(',').map(Number));
       if (scale) instance.scale.fromArray(scale.split(',').map(Number));
 
-      instance.userData.isSelectable = true;      // <- marque le root pour export
+      instance.userData.isSelectable = true;
       instance.traverse(o => {
         if (o.isMesh) {
           o.userData.isSelectable = true;
-          o.userData.object = instance;       // <- root parent pour export
+          o.userData.object = instance;
+          o.castShadow = true;     // Activer les ombres portées
+          o.receiveShadow = true;  // Activer la réception des ombres
         }
       });
       this.scene.add(instance);
@@ -243,8 +244,5 @@ export class Scene {
     if (params.sun) this.changeSun(params.sun);
 
     window.dispatchEvent(new CustomEvent('sceneChanged'));
-
   }
-
-
 }
